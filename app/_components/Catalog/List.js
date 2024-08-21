@@ -1,128 +1,138 @@
 "use client";
-import { useState } from 'react';
-import CatalogList from './CatalogBar';
-import mindrayDC60 from '@/public/images/equipments/equip-lab.png'; 
-import mindraySV300 from '@/public/images/equipments/equip-uzi.png'; 
-import cl900i from '@/public/images/equipments/equip-lab.png'; 
-import mindrayUniBase from '@/public/images/equipments/equip-uzi.png'; 
-import mindrayBeneHeart from '@/public/images/equipments/equip-lab.png'; 
-import Catalogitem from './Catalogitem';
-import Dropdown from './DropDown';
-import tableCatalog from '@/public/svg/table-catalog.svg';
-import Image from 'next/image';
-import Category from '../Modal/Category';
-import { ChevronDownIcon } from '@heroicons/react/20/solid';
+import { useState } from "react";
+import CatalogList from "./CatalogBar";
+import mindrayDC60 from "@/public/images/equipments/equip-lab.png";
+import mindraySV300 from "@/public/images/equipments/equip-uzi.png";
+import cl900i from "@/public/images/equipments/equip-lab.png";
+import mindrayUniBase from "@/public/images/equipments/equip-uzi.png";
+import mindrayBeneHeart from "@/public/images/equipments/equip-lab.png";
+import Catalogitem from "./Catalogitem";
+import Dropdown from "./DropDown";
+import tableCatalog from "@/public/svg/table-catalog.svg";
+import Image from "next/image";
+import Category from "../Modal/Category";
+import { ChevronDownIcon } from "@heroicons/react/20/solid";
 
 const categories = [
   {
-    title: 'Все товары',
-    slug: 'all',
+    title: "Все товары",
+    slug: "all",
   },
   {
-    title: 'Новинки',
-    slug: 'new',
+    title: "Новинки",
+    slug: "new",
   },
   {
-    title: 'Акции',
-    slug: 'promotions',
+    title: "Акции",
+    slug: "promotions",
   },
 ];
 
 const data = [
   {
-    category: '1-ultrasound-diagnostic-systems',
+    category: "1-ultrasound-diagnostic-systems",
     catalogList: [
       {
-        catalog: '4-portable',
+        catalog: "4-portable",
         data: [
           {
-            title: 'MINDRAY DC 60 X-insight',
-            description: 'A high-end ultrasound scanner that allows for high-quality diagnostics',
+            title: "MINDRAY DC 60 X-insight",
+            description:
+              "A high-end ultrasound scanner that allows for high-quality diagnostics",
             image: mindrayDC60,
             new: false,
             promotions: true,
-            price: '2500000 y.e',
-            sale: '-35%',
-            slug: '1-mindray',
+            price: "2500000 y.e",
+            sale: "-35%",
+            slug: "1-mindray",
           },
           {
-            title: 'MINDRAY SV300',
-            description: 'Advanced solution for mechanical ventilation in clinical settings',
+            title: "MINDRAY SV300",
+            description:
+              "Advanced solution for mechanical ventilation in clinical settings",
             image: mindraySV300,
             new: true,
             promotions: false,
-            slug: '2-mindray',
+            slug: "2-mindray",
           },
           {
-            title: 'CL-900i',
-            description: 'One of the smallest fully automated chemiluminescent immunoassay analyzers',
+            title: "CL-900i",
+            description:
+              "One of the smallest fully automated chemiluminescent immunoassay analyzers",
             image: cl900i,
             new: true,
             promotions: false,
-            sale: '-5%',
-            slug: '1-cl',
+            sale: "-5%",
+            slug: "1-cl",
           },
           {
-            title: 'MINDRAY UniBase 30',
-            description: 'Reliable and durable operating table at an affordable price',
+            title: "MINDRAY UniBase 30",
+            description:
+              "Reliable and durable operating table at an affordable price",
             image: mindrayUniBase,
             new: true,
             promotions: false,
-            slug: '2-mindray',
+            slug: "2-mindray",
           },
           {
-            title: 'MINDRAY BeneHeart',
-            description: 'Mindray’s new solution for non-invasive electrocardiography',
+            title: "MINDRAY BeneHeart",
+            description:
+              "Mindray’s new solution for non-invasive electrocardiography",
             image: mindrayBeneHeart,
             new: false,
             promotions: true,
-            price: '2500 y.e',
-            sale: '-5%',
-            slug: '4-mindray',
+            price: "2500 y.e",
+            sale: "-5%",
+            slug: "4-mindray",
           },
           {
-            title: 'MINDRAY DC 60 X-insight',
-            description: 'A high-end ultrasound scanner that allows for high-quality diagnostics',
+            title: "MINDRAY DC 60 X-insight",
+            description:
+              "A high-end ultrasound scanner that allows for high-quality diagnostics",
             image: mindrayDC60,
             new: false,
             promotions: true,
-            price: '2500 y.e',
-            sale: '-55%',
-            slug: '5-mindray',
+            price: "2500 y.e",
+            sale: "-55%",
+            slug: "5-mindray",
           },
           {
-            title: 'MINDRAY SV300',
-            description: 'Advanced solution for mechanical ventilation in clinical settings',
+            title: "MINDRAY SV300",
+            description:
+              "Advanced solution for mechanical ventilation in clinical settings",
             image: mindraySV300,
             new: true,
             promotions: false,
-            slug: '6-mindray',
+            slug: "6-mindray",
           },
           {
-            title: 'CL-900i',
-            description: 'One of the smallest fully automated chemiluminescent immunoassay analyzers',
+            title: "CL-900i",
+            description:
+              "One of the smallest fully automated chemiluminescent immunoassay analyzers",
             image: cl900i,
             new: true,
             promotions: false,
-            slug: '2-cl',
+            slug: "2-cl",
           },
           {
-            title: 'MINDRAY UniBase 30',
-            description: 'Reliable and durable operating table at an affordable price',
+            title: "MINDRAY UniBase 30",
+            description:
+              "Reliable and durable operating table at an affordable price",
             image: mindrayUniBase,
             new: true,
             promotions: false,
-            slug: '7-mindray',
+            slug: "7-mindray",
           },
           {
-            title: 'MINDRAY BeneHeart',
-            description: 'Mindray’s new solution for non-invasive electrocardiography',
+            title: "MINDRAY BeneHeart",
+            description:
+              "Mindray’s new solution for non-invasive electrocardiography",
             image: mindrayBeneHeart,
             new: false,
             promotions: true,
-            price: '2500 y.e',
-            sale: '-25%',
-            slug: '8-mindray',
+            price: "2500 y.e",
+            sale: "-25%",
+            slug: "8-mindray",
           },
         ],
       },
@@ -133,7 +143,7 @@ const data = [
 export default function List() {
   const [categoryModal, setCategoryModal] = useState(false);
   const [displayAll, setDisplayAll] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [selectedCategory, setSelectedCategory] = useState("all");
 
   const handleFilter = (category) => {
     setSelectedCategory(category);
@@ -151,9 +161,9 @@ export default function List() {
   const getFilteredData = () => {
     let items = data[0].catalogList[0].data;
 
-    if (selectedCategory === 'new') {
+    if (selectedCategory === "new") {
       items = items.filter((item) => item.new);
-    } else if (selectedCategory === 'promotions') {
+    } else if (selectedCategory === "promotions") {
       items = items.filter((item) => item.promotions);
     }
 
@@ -171,7 +181,10 @@ export default function List() {
             className="px-4 py-3 justify-center backdrop-opacity-10 flex items-center lg:hidden w-1/2 border border-gray-300"
           >
             Категории
-            <ChevronDownIcon className="w-5 h-5 ml-2 -mr-1" aria-hidden="true" />
+            <ChevronDownIcon
+              className="w-5 h-5 ml-2 -mr-1"
+              aria-hidden="true"
+            />
           </button>
           <Dropdown handleFilter={handleFilter} />
           <div className="w-full items-start  flex-col gap-2 hidden lg:flex">
@@ -181,10 +194,11 @@ export default function List() {
                   <button
                     onClick={() => handleFilter(item.slug)}
                     key={index}
-                    className={`z-10 w-auto text-lg transition-text font-semibold ${selectedCategory == item.slug
-                      ? 'text-redMain border-b-2 border-b-redMain'
-                      : 'text-neutral-400'
-                      }`}
+                    className={`z-10 w-auto text-lg transition-text font-semibold ${
+                      selectedCategory == item.slug
+                        ? "text-redMain border-b-2 border-b-redMain"
+                        : "text-neutral-400"
+                    }`}
                   >
                     <h3 className="my-2 whitespace-nowrap">{item.title}</h3>
                   </button>
@@ -215,10 +229,19 @@ export default function List() {
                 />
               </div>
             ))}
+            <button
+              // onClick={() => setProductModal(true)}
+              className="border-redMain border-dashed border-4 flex justify-center items-center text-8xl text-redMain font-bold"
+            >
+              +
+            </button>
           </div>
           {!displayAll && (
             <div className="flex justify-center mt-[50px] mdx:mt-[70px]">
-              <button className="border p-3 text-[14px] mdx:text-[16px] px-[50px] hover:bg-[#F9D2D3] font-bold" onClick={handleLoadMore}>
+              <button
+                className="border p-3 text-[14px] mdx:text-[16px] px-[50px] hover:bg-[#F9D2D3] font-bold"
+                onClick={handleLoadMore}
+              >
                 Загрузить еще
               </button>
             </div>
