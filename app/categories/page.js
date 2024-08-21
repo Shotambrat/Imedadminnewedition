@@ -1,6 +1,5 @@
-import List from "../_components/Categories/List";
-import Application from "../_components/Main/Application";
-
+import List from '../_components/Categories/List';
+import Application from '../_components/Main/Application';
 
 export default function Home() {
   return (
