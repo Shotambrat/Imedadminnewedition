@@ -4,16 +4,21 @@ import axios from "axios";
 import CategoryItem from "@/app/_components/Categories/CategoryItem";
 
 export default function List() {
-  const [categories, setCategories] = useState(null);
+  const [categories, setCategories] = useState([]);
 
   useEffect(() => {
-    let response = axios("http://213.230.91.55:8130/v1/category", {
+    axios("http://213.230.91.55:8130/v1/category", {
       headers: {
         "Accept-Language": "uz",
         "Content-Type": "application/json",
       },
     })
-      setCategories(response);
+    .then((response) => {
+      setCategories(response.data.data);
+    })
+    .catch((error) => {
+      console.error("Error fetching categories:", error);
+    });
   
   }, []);
 
