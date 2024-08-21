@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
-import EditProductModal from "./EditProductModal";
-import DeleteConfirmationModal from "./DeleteConfirmationModal";
+// import EditProductModal from "./EditProductModal";
+// import DeleteConfirmationModal from "./DeleteConfirmationModal";
 import GreenArrow from "@/app/_components/Buttons/GreenArrow";
 import fav from "@/public/svg/main/fav.svg";
 import favFilled from "@/public/svg/main/fav-filled.svg";
@@ -96,7 +96,7 @@ export default function CatalogItem({ product, onDelete, onUpdate }) {
           Delete
         </button>
       </div>
-      {showEditModal && (
+      {/* {showEditModal && (
         <EditProductModal
           product={product}
           onClose={() => setShowEditModal(false)}
@@ -109,7 +109,7 @@ export default function CatalogItem({ product, onDelete, onUpdate }) {
           onClose={() => setShowDeleteModal(false)}
           onDelete={onDelete}
         />
-      )}
+      )} */}
     </div>
   );
 }
