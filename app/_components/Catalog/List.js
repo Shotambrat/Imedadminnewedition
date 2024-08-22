@@ -6,7 +6,7 @@ import mindraySV300 from "@/public/images/equipments/equip-uzi.png";
 import cl900i from "@/public/images/equipments/equip-lab.png";
 import mindrayUniBase from "@/public/images/equipments/equip-uzi.png";
 import mindrayBeneHeart from "@/public/images/equipments/equip-lab.png";
-import CatalogItem from "./CatalogItem";
+import CatalogItem from "./Catalogitem";
 import Dropdown from "./DropDown";
 import tableCatalog from "@/public/svg/table-catalog.svg";
 import Image from "next/image";

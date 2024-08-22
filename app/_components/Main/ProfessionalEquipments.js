@@ -11,7 +11,7 @@ import mindrayUniBase from "@/public/images/equipments/equip-uzi.png"; // При
 import mindrayBeneHeart from "@/public/images/equipments/equip-lab.png"; // Пример изображения, замените на ваши изображения
 import Link from "next/link";
 import GreenArrow from "@/app/_components/Buttons/GreenArrow";
-import Catalogitem from "../Catalog/CatalogItem";
+import Catalogitem from "../Catalog/Catalogitem";
 
 const equipmentData = [
   {
