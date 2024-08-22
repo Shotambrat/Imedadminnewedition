@@ -30,8 +30,7 @@ export default function ProductMain({ closeModal }) {
     conditions: { uz: "", ru: "", en: "" },
     technical: true,
     brand: { id: 1 },
-    category: { id: 1 },
-    catalog: { id: 1 },
+    category: { id: 2 },
     clients: [{ id: 1 }],
     characteristics: [
       { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
@@ -104,8 +103,8 @@ export default function ProductMain({ closeModal }) {
   };
 
   function dataURItoFile(dataURI, filename) {
-    const byteString = atob(dataURI.split(',')[1]);
-    const mimeString = dataURI.split(',')[0].split(':')[1].split(';')[0];
+    const byteString = atob(dataURI.split(",")[1]);
+    const mimeString = dataURI.split(",")[0].split(":")[1].split(";")[0];
     const ab = new ArrayBuffer(byteString.length);
     const ia = new Uint8Array(ab);
     for (let i = 0; i < byteString.length; i++) {
@@ -131,19 +130,30 @@ export default function ProductMain({ closeModal }) {
 
     try {
       for (const item of createdList) {
-        const { gallery, files, id, catalog, reviewsList, ...other } = item;
-        const { clients, ...others} = other;
+        const { gallery, files, id, category, catalog, reviewsList, ...other } =
+          item;
+        const { clients, ...others } = other;
         const formData = new FormData();
 
-        const clientsFiltered = clients.map(item => {
+        const clientsFiltered = clients.map((item) => {
           return {
-            id: item.id
+            id: item.id,
           };
         });
 
-        console.log("hhhh", clientsFiltered)
+        console.log("hhhh", files);
 
-        formData.append("json", JSON.stringify({...others, clients: clientsFiltered}));
+        if (catalog !== null) {
+          formData.append(
+            "json",
+            JSON.stringify({ ...others, clients: clientsFiltered, catalog })
+          );
+        } else {
+          formData.append(
+            "json",
+            JSON.stringify({ ...others, clients: clientsFiltered, category })
+          );
+        }
 
         for (const [index, file] of gallery.entries()) {
           if (typeof file === "string" && file.startsWith("blob:")) {
@@ -170,7 +180,17 @@ export default function ProductMain({ closeModal }) {
         // Optionally handle file uploads
         if (files.length > 0) {
           const fileData = new FormData();
-          files.forEach((file) => fileData.append("files", file));
+          for (const file of files) {
+            if (file.downloadLink && file.downloadLink.startsWith("blob:")) {
+              const convertedFile = await blobToFile(
+                file.downloadLink,
+                file.name
+              );
+              fileData.append("files", convertedFile);
+            } else if (file instanceof File) {
+              fileData.append("files", file);
+            }
+          }
           fileData.append("product-id", productId);
 
           await axios.post("https://imed.uz/api/v1/product/file", fileData, {
@@ -183,7 +203,7 @@ export default function ProductMain({ closeModal }) {
         // Optionally handle reviews
         for (const review of reviewsList) {
           const reviewFormData = new FormData();
-          console.log(review)
+          console.log(review);
           reviewFormData.append(
             "json",
             JSON.stringify({
@@ -193,7 +213,10 @@ export default function ProductMain({ closeModal }) {
             })
           );
           reviewFormData.append("product-id", productId);
-          if (review.avatarImage && review.avatarImage.startsWith("data:image/")) {
+          if (
+            review.avatarImage &&
+            review.avatarImage.startsWith("data:image/")
+          ) {
             const reviewFile = dataURItoFile(review.avatarImage, "avatar.png");
             reviewFormData.append("doctor-photo", reviewFile);
           }
@@ -209,12 +232,13 @@ export default function ProductMain({ closeModal }) {
           );
         }
       }
-      alert("Все продукты успешно созданы и данные загружены!");
+      setLoading(false);
+      closeModal(false);
     } catch (error) {
       console.error("Ошибка при создании продукта:", error);
-      setError("Произошла ошибка при сохранении продукта.");
-    } finally {
+      alert("Произошла ошибка, проверьте данные или обратитесь к разработчику")
       setLoading(false);
+      setError("Произошла ошибка при сохранении продукта.");
     }
   };
 

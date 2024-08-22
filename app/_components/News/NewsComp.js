@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
 import newsPhoto from "@/public/images/news/news-photo.png";
 import NewCard from "@/app/_components/News/NewCard";
 import Pagination from "@/app/_components/News/Pagination";
 import Link from "next/link";
-import { useState } from 'react';
+import { useState } from "react";
+import NewsMain from "../AdminModal/News/NewsMain";
 
 export default function NewsComp() {
   const data = [
@@ -15,7 +16,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "The Impact of Portable Medical Devices on Healthcare Accessibility",
+      title:
+        "The Impact of Portable Medical Devices on Healthcare Accessibility",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "medical-devices",
@@ -27,7 +29,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "Children's health: Vaccination and prevention of infectious diseases",
+      title:
+        "Children's health: Vaccination and prevention of infectious diseases",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "children",
@@ -39,7 +42,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "The Impact of Portable Medical Devices on Healthcare Accessibility",
+      title:
+        "The Impact of Portable Medical Devices on Healthcare Accessibility",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "medical-devices",
@@ -51,7 +55,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "Children's health: Vaccination and prevention of infectious diseases",
+      title:
+        "Children's health: Vaccination and prevention of infectious diseases",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "children",
@@ -63,7 +68,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "The Impact of Portable Medical Devices on Healthcare Accessibility",
+      title:
+        "The Impact of Portable Medical Devices on Healthcare Accessibility",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "medical-devices",
@@ -75,7 +81,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "Children's health: Vaccination and prevention of infectious diseases",
+      title:
+        "Children's health: Vaccination and prevention of infectious diseases",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "children",
@@ -87,7 +94,8 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "The Impact of Portable Medical Devices on Healthcare Accessibility",
+      title:
+        "The Impact of Portable Medical Devices on Healthcare Accessibility",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "medical-devices",
@@ -99,13 +107,14 @@ export default function NewsComp() {
       slug: "telemedicine",
     },
     {
-      title: "Children's health: Vaccination and prevention of infectious diseases",
+      title:
+        "Children's health: Vaccination and prevention of infectious diseases",
       date: "12 June",
       imageSrc: newsPhoto,
       slug: "children",
     },
-
   ];
+  const [adminModal, setAdminModal] = useState(false);
 
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // Количество новостей на одной странице
@@ -119,7 +128,18 @@ export default function NewsComp() {
 
   return (
     <div className="w-full max-w-[1440px] mx-auto px-2 flex flex-col gap-8 my-[120px] mdx:my-[200px] 2xl:my-[250px]">
-      <h2 className="text-[25px] mdx:text-[30px] mdl:text-[35px] xl:text-[40px] font-semibold">НОВОСТИ</h2>
+      {adminModal && <NewsMain closeModal={setAdminModal} />}
+      <div className="flex w-full justify-between">
+        <h2 className="text-[25px] mdx:text-[30px] mdl:text-[35px] xl:text-[40px] font-semibold">
+          НОВОСТИ
+        </h2>
+        <button
+          onClick={() => setAdminModal(true)}
+          className="px-12 py-3 bg-redMain rounded-xl text-white font-semibold"
+        >
+          Добавить новость
+        </button>
+      </div>
       <div className="w-full grid gap-4 grid-cols-1 mdl:grid-cols-2 xl:grid-cols-4 h-auto">
         {currentItems.map((item, i) => (
           <Link key={i} href={`/news/${item.slug}`}>
@@ -133,7 +153,11 @@ export default function NewsComp() {
         ))}
       </div>
       <div className="flex w-full justify-center">
-        <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
+        <Pagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          onPageChange={setCurrentPage}
+        />
       </div>
     </div>
   );

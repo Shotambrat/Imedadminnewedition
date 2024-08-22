@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import axios from "axios";
 
 export default function ProductPreviewEditModal({
   setCreatedList,
@@ -10,24 +11,55 @@ export default function ProductPreviewEditModal({
   onClose,
 }) {
   const [localData, setLocalData] = useState({ ...activeItem });
+  const [brands, setBrands] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [catalogs, setCatalogs] = useState([]);
 
+  // Fetch brands from API
   useEffect(() => {
-    setLocalData((prevData) => ({
-      ...prevData,
-      name: {
-        ...prevData.name,
-        [activeLang]: activeItem.name[activeLang] || "",
-      },
-      shortDescription: {
-        ...prevData.shortDescription,
-        [activeLang]: activeItem.shortDescription[activeLang] || "",
-      },
-      conditions: {
-        ...prevData.conditions,
-        [activeLang]: activeItem.conditions[activeLang] || "",
-      },
-    }));
-  }, [activeLang, activeItem]);
+    axios
+      .get("http://213.230.91.55:8130/v1/partner/all", {
+        headers: { "Accept-Language": "uz" },
+      })
+      .then((response) => {
+        setBrands(response.data.data);
+      })
+      .catch((error) => console.error("Error fetching brands:", error));
+  }, []);
+
+  // Fetch categories from API
+  useEffect(() => {
+    axios
+      .get("http://213.230.91.55:8130/v1/category", {
+        headers: { "Accept-Language": "uz" },
+      })
+      .then((response) => {
+        setCategories(response.data.data);
+      })
+      .catch((error) => console.error("Error fetching categories:", error));
+  }, []);
+
+  // Update catalogs when category changes
+  useEffect(() => {
+    const selectedCategory = categories.find(
+      (cat) => cat.id == localData.category.id
+    );
+    if (selectedCategory && selectedCategory.catalogs.length > 0) {
+      console.log("Updated catalogs:", selectedCategory.catalogs);
+      setCatalogs(selectedCategory.catalogs);
+      setLocalData((prevData) => ({
+        ...prevData,
+        catalog: { id: selectedCategory.catalogs[0].id }, // Set the first catalog by default
+      }));
+    } else {
+      console.log("No catalogs available for this category", selectedCategory?.catalogs);
+      setCatalogs([]);
+      setLocalData((prevData) => ({
+        ...prevData,
+        catalog: { id: null }, // Reset catalog if none available
+      }));
+    }
+  }, [localData.category.id, categories]);
 
   const handleLanguageChange = (lang) => {
     setActiveLang(lang);
@@ -45,7 +77,6 @@ export default function ProductPreviewEditModal({
   const handleLocalizedChange = (e) => {
     const { name, value } = e.target;
 
-    // Обновляем локальные данные
     const updatedLocalData = {
       ...localData,
       [name]: {
@@ -55,14 +86,12 @@ export default function ProductPreviewEditModal({
     };
     setLocalData(updatedLocalData);
 
-    // Обновляем активный элемент
     const updatedActiveItem = {
       ...activeItem,
       [name]: updatedLocalData[name],
     };
     setActiveItem(updatedActiveItem);
 
-    // Обновляем список созданных элементов
     setCreatedList((prevList) =>
       prevList.map((item) =>
         item.id === updatedActiveItem.id ? updatedActiveItem : item
@@ -70,9 +99,13 @@ export default function ProductPreviewEditModal({
     );
   };
 
+  // Calculate final price
+  const finalPrice =
+    localData.sale && localData.discount > 0
+      ? Math.round(localData.originalPrice * (1 - localData.discount / 100))
+      : localData.originalPrice || 0;
 
   const handleSave = () => {
-    // Ensure that all language data is preserved when saving
     const updatedItem = {
       ...activeItem,
       name: localData.name,
@@ -85,11 +118,16 @@ export default function ProductPreviewEditModal({
       technical: localData.technical,
       active: localData.active,
       popular: localData.popular,
-      brand: localData.brand,
-      category: localData.category,
-      catalog: localData.catalog,
+      brand: { id: localData.brand.id },
+      category: localData.category.id || null,
+      catalog: catalogs.length > 0 ? localData.catalog.id : null,
       gallery: localData.gallery,
     };
+
+    if (!updatedItem.category && !updatedItem.catalog) {
+      alert("Ошибка: Категория или Каталог должны быть выбраны.");
+      return;
+    }
 
     setCreatedList((prevList) =>
       prevList.map((item) =>
@@ -100,11 +138,6 @@ export default function ProductPreviewEditModal({
     setActiveItem(updatedItem);
     onClose();
   };
-
-  const finalPrice =
-    localData.sale && localData.discount > 0
-      ? Math.round(localData.originalPrice * (1 - localData.discount / 100))
-      : localData.originalPrice || 0;
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -275,8 +308,7 @@ export default function ProductPreviewEditModal({
         {/* Brand */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Бренд</label>
-          <input
-            type="number"
+          <select
             name="brand"
             value={localData.brand.id}
             onChange={(e) =>
@@ -286,14 +318,19 @@ export default function ProductPreviewEditModal({
               }))
             }
             className="w-full p-2 border border-gray-300 rounded"
-          />
+          >
+            {brands.map((brand) => (
+              <option key={brand.id} value={brand.id}>
+                {brand.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Category */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Категория</label>
-          <input
-            type="number"
+          <select
             name="category"
             value={localData.category.id}
             onChange={(e) =>
@@ -303,24 +340,39 @@ export default function ProductPreviewEditModal({
               }))
             }
             className="w-full p-2 border border-gray-300 rounded"
-          />
+          >
+            {categories.map((category) => (
+              <option key={category.id} value={category.id}>
+                {category.name}
+              </option>
+            ))}
+          </select>
         </div>
 
         {/* Catalog */}
         <div className="mb-4">
           <label className="block text-sm font-medium mb-2">Каталог</label>
-          <input
-            type="number"
-            name="catalog"
-            value={localData.catalog.id}
-            onChange={(e) =>
-              setLocalData((prevData) => ({
-                ...prevData,
-                catalog: { id: e.target.value },
-              }))
-            }
-            className="w-full p-2 border border-gray-300 rounded"
-          />
+          {catalogs.length > 0 ? (
+            <select
+              name="catalog"
+              value={localData.catalog.id}
+              onChange={(e) =>
+                setLocalData((prevData) => ({
+                  ...prevData,
+                  catalog: { id: e.target.value },
+                }))
+              }
+              className="w-full p-2 border border-gray-300 rounded"
+            >
+              {catalogs.map((catalog) => (
+                <option key={catalog.id} value={catalog.id}>
+                  {catalog.name}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <div className="text-gray-500">Нет каталогов</div>
+          )}
         </div>
 
         {/* Save/Cancel Buttons */}

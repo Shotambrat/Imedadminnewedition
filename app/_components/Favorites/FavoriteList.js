@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from 'react';
-import Catalogitem from '@/app/_components/Catalog/Catalogitem';
+import Catalogitem from '@/app/_components/Catalog/CatalogItem';
 import SignUpForEvent from '@/app/_components/Modal/SendKp'; 
 
 export default function FavoriteList() {

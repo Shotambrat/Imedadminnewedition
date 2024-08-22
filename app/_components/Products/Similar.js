@@ -9,7 +9,7 @@ import cl900i from "@/public/images/equipments/equip-lab.png"; // Пример �
 import mindrayUniBase from "@/public/images/equipments/equip-uzi.png"; // Пример изображения, замените на ваши изображения
 import Link from "next/link";
 import GreenArrow from "@/app/_components/Buttons/GreenArrow";
-import Catalogitem from "../Catalog/Catalogitem";
+import Catalogitem from "../Catalog/CatalogItem";
 
 export default function Similar() {
   const equipmentData = [
