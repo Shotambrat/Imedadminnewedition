@@ -242,6 +242,8 @@ export default function ProductMain({ closeModal }) {
     }
   };
 
+  console.log("Created",createdList)
+
   return (
     <div className="fixed h-screen flex w-full bg-modalBg z-[999] inset-0">
       {loading && (
@@ -274,6 +276,7 @@ export default function ProductMain({ closeModal }) {
           languages={languages}
           activeLang={activeLang}
           setActiveLang={setActiveLang}
+          createdList={createdList}
         />
       </div>
       {error && (

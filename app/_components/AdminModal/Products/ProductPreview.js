@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import VerticalCarousel from "./VerticalCarousel";
 import ProductPreviewEditModal from "./ProductPreviewEditModal";
@@ -10,8 +10,15 @@ export default function ProductPreview({
   languages,
   activeLang,
   setActiveLang,
+  createdList,
 }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [gallery, setGallery] = useState(() => {
+    const foundElem = createdList.find((item) => item.id == activeItem.id);
+    return foundElem ? foundElem.gallery : [];
+  });
+
+  console.log("Gallery", gallery);
 
   const handleOpenEditModal = () => {
     setIsEditModalOpen(true);
@@ -21,11 +28,24 @@ export default function ProductPreview({
     setIsEditModalOpen(false);
   };
 
+  useEffect(() => {
+    const foundElem = createdList.find((item) => item.id == activeItem.id);
+    if (foundElem && foundElem.gallery !== gallery) {
+      setGallery([...foundElem.gallery]);
+    }
+  }, [activeItem, createdList]);
+
   const handleGalleryUpdate = (newGallery) => {
-    setActiveItem((prevItem) => ({
-      ...prevItem,
-      gallery: newGallery,
-    }));
+    setCreatedList((prevItems) =>
+      prevItems.map((item) =>
+        item.id === activeItem.id
+          ? {
+              ...item,
+              gallery: newGallery,
+            }
+          : item
+      )
+    );
   };
 
   const finalPrice =
@@ -37,7 +57,7 @@ export default function ProductPreview({
     <div className="w-full flex flex-col lg:flex-row gap-6">
       <div className="flex-1 w-full">
         <VerticalCarousel
-          images={activeItem.gallery}
+          images={gallery}
           onGalleryUpdate={handleGalleryUpdate}
         />
       </div>
