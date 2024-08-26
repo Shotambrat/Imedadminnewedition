@@ -67,8 +67,8 @@ export default function ClientsMain({ closeModal }) {
 
   const handleChangeActiveId = (id) => {
     const updatedItem = createdList.find((item) => item.id === id);
-    setActiveId(id);
     setActiveItem(updatedItem);
+    setActiveId(id);
   };
 
   const handleAddClient = () => {

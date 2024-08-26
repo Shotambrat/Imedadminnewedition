@@ -35,10 +35,6 @@ export default function ProductMain({ closeModal }) {
     characteristics: [
       { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
     ],
-    maintenance: {
-      title: { uz: "", ru: "", en: "" },
-      text: { uz: "", ru: "", en: "" },
-    },
     active: true,
     popular: false,
     gallery: [],
@@ -68,30 +64,28 @@ export default function ProductMain({ closeModal }) {
   // Handle switching active item by ID
   const handleChangeActiveId = (id) => {
     const updatedItem = createdList.find((item) => item.id === id);
-    setActiveId(id);
     setActiveItem(updatedItem);
+    setActiveId(id);
   };
 
-  // Add a new item
   const handleAddItem = () => {
     const newItem = { ...emptyItem, id: idCounter };
-    setIdCounter((prevCounter) => prevCounter + 1);
     setCreatedList((prevList) => [...prevList, newItem]);
     setActiveItem(newItem);
-    setActiveId(newItem.id);
+    setIdCounter(idCounter + 1);
   };
 
-  // Delete an item by ID
   const handleDeleteItem = (id) => {
-    const updatedList = createdList.filter((item) => item.id !== id);
-    setCreatedList(updatedList);
+    setCreatedList((prevList) => {
+      const updatedList = prevList.filter((item) => item.id !== id);
+      return updatedList;
+    });
     if (updatedList.length > 0) {
-      const nextActiveItem = updatedList[0];
-      setActiveId(nextActiveItem.id);
-      setActiveItem(nextActiveItem);
+      setActiveItem(updatedList[0]);
+      setActiveId(updatedList[0].id);
     } else {
-      setActiveId(null);
       setActiveItem(null);
+      setActiveId(null);
     }
   };
 

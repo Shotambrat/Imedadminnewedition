@@ -36,15 +36,16 @@ export default function EditModal({ filtered, activeLang, onSave, onClose }) {
   };
 
   const handleSave = () => {
-    // Убедитесь, что вы правильно обновляете состояние в activeItem и setCreatedList
+    // Сохранение изменений сразу в activeItem и createdList
+    setActiveItem(localData);
     setCreatedList((prevList) =>
       prevList.map((item) =>
-        item.id === localData.id ? { ...item, ...localData } : item
+        item.id === activeItem.id ? localData : item
       )
     );
-    setActiveItem(localData);
-    onClose(); // Закрываем модальное окно после сохранения
+    onClose();
   };
+  
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
