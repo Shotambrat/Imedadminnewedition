@@ -15,6 +15,13 @@ export default function ProductPreviewEditModal({
   const [categories, setCategories] = useState([]);
   const [catalogs, setCatalogs] = useState([]);
 
+  // Локальное состояние для управления вводом по каждому языку
+  const [localData, setLocalData] = useState({
+    name: activeItem.name,
+    shortDescription: activeItem.shortDescription,
+    conditions: activeItem.conditions,
+  });
+
   // react-hook-form setup
   const {
     register,
@@ -24,34 +31,18 @@ export default function ProductPreviewEditModal({
     formState: { errors },
   } = useForm({
     defaultValues: {
-      ...activeItem,
-      name: activeItem.name,
-      shortDescription: activeItem.shortDescription,
-      conditions: activeItem.conditions,
-      brand: activeItem.brand.id,
-      category: activeItem.category.id,
-      catalog: activeItem.catalog?.id || null,
+      brand: activeItem.brand?.id || '',
+      category: activeItem.category?.id || '',
+      catalog: activeItem.catalog?.id || '',
     },
   });
 
   const onSubmit = (data) => {
     const updatedItem = {
       ...activeItem,
-      name: {
-        uz: data.name.uz,
-        ru: data.name.ru,
-        en: data.name.en,
-      },
-      shortDescription: {
-        uz: data.shortDescription.uz,
-        ru: data.shortDescription.ru,
-        en: data.shortDescription.en,
-      },
-      conditions: {
-        uz: data.conditions.uz,
-        ru: data.conditions.ru,
-        en: data.conditions.en,
-      },
+      name: localData.name,
+      shortDescription: localData.shortDescription,
+      conditions: localData.conditions,
       originalPrice: data.originalPrice,
       discount: data.discount,
       sale: data.sale,
@@ -60,8 +51,8 @@ export default function ProductPreviewEditModal({
       active: data.active,
       popular: data.popular,
       brand: { id: data.brand },
-      category: { id: data.category} || null,
-      catalog: { id: data.catalog } || null,
+      category: data.category ? { id: data.category } : null,
+      catalog: data.catalog ? { id: data.catalog } : null,
       gallery: activeItem.gallery,
     };
 
@@ -111,12 +102,23 @@ export default function ProductPreviewEditModal({
     );
     if (selectedCategory && selectedCategory.catalogs.length > 0) {
       setCatalogs(selectedCategory.catalogs);
-      setValue("catalog", selectedCategory.catalogs[0].id);
+      setValue("catalog", selectedCategory.catalogs[0]?.id || null);
     } else {
       setCatalogs([]);
       setValue("catalog", null);
     }
   }, [watch("category"), categories]);
+
+  const handleInputChange = (e, lang, field) => {
+    const value = e.target.value;
+    setLocalData((prevData) => ({
+      ...prevData,
+      [field]: {
+        ...prevData[field],
+        [lang]: value,
+      },
+    }));
+  };
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -145,12 +147,10 @@ export default function ProductPreviewEditModal({
               Название ({activeLang.toUpperCase()})
             </label>
             <input
-              {...register(`name.${activeLang}`, { required: "Название обязательно" })}
+              value={localData.name[activeLang]}
+              onChange={(e) => handleInputChange(e, activeLang, 'name')}
               className="w-full p-2 border border-gray-300 rounded"
             />
-            {errors.name && errors.name[activeLang] && (
-              <span className="text-red-500">{errors.name[activeLang].message}</span>
-            )}
           </div>
 
           {/* Short Description */}
@@ -159,12 +159,10 @@ export default function ProductPreviewEditModal({
               Краткое описание ({activeLang.toUpperCase()})
             </label>
             <textarea
-              {...register(`shortDescription.${activeLang}`, { required: "Описание обязательно" })}
+              value={localData.shortDescription[activeLang]}
+              onChange={(e) => handleInputChange(e, activeLang, 'shortDescription')}
               className="w-full p-2 border border-gray-300 rounded"
             />
-            {errors.shortDescription && errors.shortDescription[activeLang] && (
-              <span className="text-red-500">{errors.shortDescription[activeLang].message}</span>
-            )}
           </div>
 
           {/* Conditions */}
@@ -173,7 +171,8 @@ export default function ProductPreviewEditModal({
               Условия ({activeLang.toUpperCase()})
             </label>
             <textarea
-              {...register(`conditions.${activeLang}`)}
+              value={localData.conditions[activeLang]}
+              onChange={(e) => handleInputChange(e, activeLang, 'conditions')}
               className="w-full p-2 border border-gray-300 rounded"
             />
           </div>
