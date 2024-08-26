@@ -4,118 +4,24 @@ import newsPhoto from "@/public/images/news/news-photo.png";
 import NewCard from "@/app/_components/News/NewCard";
 import Pagination from "@/app/_components/News/Pagination";
 import Link from "next/link";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import NewsMain from "../AdminModal/News/NewsMain";
+import axios from "axios";
 
 export default function NewsComp() {
-  const data = [
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "The Impact of Portable Medical Devices on Healthcare Accessibility",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "medical-devices",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "Children's health: Vaccination and prevention of infectious diseases",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "children",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "The Impact of Portable Medical Devices on Healthcare Accessibility",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "medical-devices",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "Children's health: Vaccination and prevention of infectious diseases",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "children",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "The Impact of Portable Medical Devices on Healthcare Accessibility",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "medical-devices",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "Children's health: Vaccination and prevention of infectious diseases",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "children",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "The Impact of Portable Medical Devices on Healthcare Accessibility",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "medical-devices",
-    },
-    {
-      title: "The Future of Telemedicine and Remote Patient Monitoring",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "telemedicine",
-    },
-    {
-      title:
-        "Children's health: Vaccination and prevention of infectious diseases",
-      date: "12 June",
-      imageSrc: newsPhoto,
-      slug: "children",
-    },
-  ];
+  const [data, setData] = useState([]);
+  useEffect(() => {
+    axios('http://213.230.91.55:8130/v1/new/get-all?page=1', {
+      headers: {
+        'Accept-Language': 'ru'
+      }
+    })
+    .then(response => response.data.data)
+    .then(data => setData(data))
+  }, [])
   const [adminModal, setAdminModal] = useState(false);
 
+  console.log(data)
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 12; // Количество новостей на одной странице
 
@@ -145,9 +51,10 @@ export default function NewsComp() {
           <Link key={i} href={`/news/${item.slug}`}>
             <NewCard
               key={i}
-              title={item.title}
-              date={item.date}
-              imageSrc={item.imageSrc}
+              id={item.id}
+              title={item.head.heading.slice(0, 70)}
+              date={item.createdDate}
+              imageSrc={item.head.photo?.url}
             />
           </Link>
         ))}

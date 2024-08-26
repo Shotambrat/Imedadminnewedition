@@ -6,41 +6,22 @@ import partnerPhoto from "@/public/images/aboutUs/partners/image3.png";
 import partnerPhoto1 from "@/public/images/aboutUs/partners/image58.png";
 import GreenArrow from "../Buttons/GreenArrow";
 import PartnersMain from "@/app/_components/AdminModal/Partners/PartnersMain"
+import axios from 'axios';
 
-const partners = [
-    {
-        id: 1,
-        imageSrc: partnerPhoto,
-        title: "Lingen",
-        description: "Lingen Precision Medical Products Co., Ltd. is a unique manufacturer specializing in medical products",
-        link: "browiner"
-    },
-    {
-        id: 2,
-        imageSrc: partnerPhoto1,
-        title: "Lingen",
-        description: "Lingen Precision Medical Products Co., Ltd. is a unique manufacturer specializing in medical products",
-        link: "browiner"
-    },
-    {
-        id: 3,
-        imageSrc: partnerPhoto1,
-        title: "Lingen",
-        description: "Lingen Precision Medical Products Co., Ltd. is a unique manufacturer specializing in medical products",
-        link: "browiner"
-    },
-    {
-        id: 4,
-        imageSrc: partnerPhoto,
-        title: "Lingen",
-        description: "Lingen Precision Medical Products Co., Ltd. is a unique manufacturer specializing in medical products",
-        link: "browiner"
-    },
-    
-];
 
 export default function ListPartners() {
     const [showAll, setShowAll] = useState(false);
+    const [partners, setPartners] = useState([]);
+    useEffect(() => {
+        axios('https://imed.uz/api/v1/partner/all', {
+            headers: {
+                'Accept-Language': 'uz'
+            }
+        })
+        .then(response => {
+            setPartners(response.data.data);
+        })
+    }, [])
 
     useEffect(() => {
         const handleResize = () => {

@@ -2,41 +2,51 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import partnerPhoto1 from "@/public/images/clients/image1.png";
 import GreenArrow from "../Buttons/GreenArrow";
 import ClientsMain from "@/app/_components/AdminModal/Clients/ClientsMain";
 import axios from "axios";
-
-
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import EditClientModal from "./EditClientModal";
 
 export default function ListClients() {
   const [visibleCount, setVisibleCount] = useState(6);
   const [adminModal, setAdminModal] = useState(false);
-  const [clients, setClients] = useState([])
+  const [clients, setClients] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editModalSlug, setEditModalSlug] = useState(null);
 
   useEffect(() => {
     try {
-      axios.get('https://imed.uz/api/v1/client/all', {
-        headers: {
-          "Accept-Language": "uz",
-        },
-      })
-      .then(response => {
-        return response.data
-      })
-      .then(data => setClients(data.data))
-      .catch(e => {
-        throw Error('Ошибка при загрузке данных', e)
-      })
+      axios
+        .get("https://imed.uz/api/v1/client/all", {
+          headers: {
+            "Accept-Language": "uz",
+          },
+        })
+        .then((response) => {
+          return response.data;
+        })
+        .then((data) => setClients(data.data))
+        .catch((e) => {
+          throw Error("Ошибка при загрузке данных", e);
+        });
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
-  }, [])
+  }, []);
 
-  console.log("Clients", clients)
+  console.log("Clients", clients);
 
   const showMoreClients = () => {
     setVisibleCount(clients.length);
+  };
+
+  const handleEditClick = (slug) => {
+    setEditModalSlug(slug); // Устанавливаем slug выбранного клиента
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalSlug(null); // Закрываем модальное окно
   };
 
   return (
@@ -57,14 +67,13 @@ export default function ListClients() {
         {clients.slice(0, visibleCount).map((card) => (
           <div
             key={card.id}
-            className="bg-white p-4 w-full border-[1px] border-gray-200 mdx:p-0 mdl:p-5 slg:h-auto"
+            className="bg-white p-4 w-full border-[1px] border-gray-200 mdx:p-0 mdl:p-5 slg:h-auto relative group"
           >
             <div className="mdx:flex mdx:flex-row items-center justify-between ">
               <div className="mdx:w-[50%] h-full relative flex justify-center">
                 <Image
                   src={card.logo.url}
                   alt={card.name}
-
                   height={1000}
                   width={1000}
                   className="w-[70%] h-auto object-contain"
@@ -84,6 +93,33 @@ export default function ListClients() {
                 </Link>
               </div>
             </div>
+            <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => handleEditClick(card.slug)} // Устанавливаем slug при клике
+              >
+                Edit Info
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete
+              </button>
+            </div>
+            {showDeleteModal && (
+              <DeleteConfirmationModal
+                productId={card.id}
+                onClose={() => setShowDeleteModal(false)}
+              />
+            )}
+
+            {editModalSlug === card.slug && ( // Открываем модальное окно только для выбранного клиента
+              <EditClientModal
+                slug={card.slug}
+                onClose={handleCloseEditModal}
+              />
+            )}
           </div>
         ))}
       </div>
