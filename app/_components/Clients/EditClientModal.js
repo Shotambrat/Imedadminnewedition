@@ -6,28 +6,25 @@ import GalleryUploader from "@/app/_components/AdminModal/Clients/GalleryUploade
 import axios from "axios";
 
 const ClientsInfo = ({ slug, onClose }) => {
-  const [client, setClient] = useState([]);
+  const [client, setClient] = useState(null); // Инициализация как null, чтобы показать, что данных еще нет
   const [activeLang, setActiveLang] = useState('uz');
-  useEffect(() => {
-    try {
-      axios
-        .get(`https://imed.uz/api/v1/client/${slug}`, {
-          headers: {
-            'Accept-Language': '',
-          },
-        })
-        .then((response) => {
-          setClient(response.data.data);
-        })
-        .catch((error) => {
-          console.error("Error to fetch clients", error);
-        });
-    } catch (error) {
-      throw Error("Error to fetch clients", error);
-    }
-  }, []);
 
-  const languages = ['uz', 'ru', 'en']
+  useEffect(() => {
+    axios
+      .get(`https://imed.uz/api/v1/client/${slug}`, {
+        headers: {
+          'Accept-Language': '',
+        },
+      })
+      .then((response) => {
+        setClient(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error to fetch clients", error);
+      });
+  }, [slug]);
+
+  const languages = ['uz', 'ru', 'en'];
 
   const handleInputChange = (field, value) => {
     const updatedItem = { ...client, [field]: value };
@@ -70,9 +67,14 @@ const ClientsInfo = ({ slug, onClose }) => {
     setClient(updatedItem);
   };
 
+  // Условный рендеринг, чтобы не пытаться отобразить данные до их загрузки
+  if (!client) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div className="w-full h-screen fixed inset-0 bg-modalBg flex justify-center items-center z-[9999]">
-      <div className="w-[70%] h-[95%] overflow-y-scroll bg-white ">
+      <div className="w-[70%] h-[95%] overflow-y-scroll bg-white">
         <div className="w-full max-w-4xl mx-auto">
           <div className="mb-6">
             <h2 className="text-2xl font-semibold mb-4">
@@ -110,7 +112,7 @@ const ClientsInfo = ({ slug, onClose }) => {
                 Описание
               </label>
               <textarea
-                value={client.description[activeLang]}
+                value={client.description[activeLang] || ''} // Устанавливаем значение по умолчанию как пустую строку
                 onChange={(e) =>
                   handleDescriptionChange(activeLang, e.target.value)
                 }
