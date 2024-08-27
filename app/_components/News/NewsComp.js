@@ -55,6 +55,7 @@ export default function NewsComp() {
               title={item.head.heading.slice(0, 70)}
               date={item.createdDate}
               imageSrc={item.head.photo?.url}
+              slug={item.slug}
             />
           </Link>
         ))}

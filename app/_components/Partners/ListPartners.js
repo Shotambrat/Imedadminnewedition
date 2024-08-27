@@ -8,6 +8,7 @@ import GreenArrow from "../Buttons/GreenArrow";
 import PartnersMain from "@/app/_components/AdminModal/Partners/PartnersMain";
 import axios from "axios";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import EditPartnerModal from "./EditPartnerModal";
 
 export default function ListPartners() {
   const [showAll, setShowAll] = useState(false);
@@ -47,6 +48,14 @@ export default function ListPartners() {
 
   const visiblePartners = showAll ? partners : partners.slice(0, 2);
 
+  const handleEditClick = (slug) => {
+    setEditModalSlug(slug); // Устанавливаем slug выбранного клиента
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalSlug(null); // Закрываем модальное окно
+  };
+
   return (
     <div className="w-full max-w-[1440px] mx-auto px-2 flex flex-col gap-8 mt-7">
       {adminModal && <PartnersMain closeModal={setAdminModal} />}
@@ -80,12 +89,12 @@ export default function ListPartners() {
               </div>
             </div>
             <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-              {/* <button
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-          onClick={() => handleEditClick(card.slug)} // Устанавливаем slug при клике
-        >
-          Edit Info
-        </button> */}
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => handleEditClick(card.slug)} // Устанавливаем slug при клике
+              >
+                Edit Info
+              </button>
               <button
                 className="px-4 py-2 bg-red-500 text-white rounded-lg"
                 onClick={(e) => {
@@ -104,9 +113,12 @@ export default function ListPartners() {
               />
             )}
 
-            {/* {editModalSlug === card.slug && ( // Открываем модальное окно только для выбранного клиента
-        <EditClientModal slug={card.slug} onClose={handleCloseEditModal} />
-      )} */}
+            {editModalSlug === card.slug && ( // Открываем модальное окно только для выбранного клиента
+              <EditPartnerModal
+                slug={card.slug}
+                onClose={handleCloseEditModal}
+              />
+            )}
           </div>
         ))}
         <button
