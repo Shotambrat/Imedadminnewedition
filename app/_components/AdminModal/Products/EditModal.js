@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 
+
 export default function EditModal({ filtered, activeLang, onSave, onClose }) {
   const [localData, setLocalData] = useState(filtered.data);
 
