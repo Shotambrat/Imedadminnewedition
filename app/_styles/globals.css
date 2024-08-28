@@ -215,3 +215,7 @@ body {
 .custom-gallery .image-gallery-thumbnail:hover .delete-button {
   opacity: 1;
 }
+
+.modal-open .content-under-modal {
+  pointer-events: none;
+}

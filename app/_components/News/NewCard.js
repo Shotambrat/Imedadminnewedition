@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
 import { useState } from "react";
 import Image from "next/image";
 import GreenArrow from "../Buttons/GreenArrow";
 import DeleteConfirmationModal from "./DeleteConfirmationModal";
-import EditNewModal from "./EditNewModal"
+import EditNewModal from "./EditNewModal";
+import Link from "next/link";
 
 export default function NewCard({ key, id, title, date, imageSrc, slug }) {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -19,6 +20,7 @@ export default function NewCard({ key, id, title, date, imageSrc, slug }) {
   };
   return (
     <div className="w-full border border-neutral-300 bg-white h-full flex flex-col gap-5 justify-between relative group">
+      <Link href={`/news/${slug}`}>
       <Image
         src={imageSrc}
         width={500}
@@ -36,7 +38,7 @@ export default function NewCard({ key, id, title, date, imageSrc, slug }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            handleEditClick(slug)
+            handleEditClick(slug);
           }} // Устанавливаем slug при клике
         >
           Edit Info
@@ -46,21 +48,27 @@ export default function NewCard({ key, id, title, date, imageSrc, slug }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setShowDeleteModal(true)
+            setShowDeleteModal(true);
           }}
         >
           Delete
         </button>
       </div>
+      
+      </Link>
       {showDeleteModal && (
         <DeleteConfirmationModal
-          productId={id}  
+          productId={id}
           onClose={() => setShowDeleteModal(false)}
         />
       )}
 
       {editModalSlug === slug && ( // Открываем модальное окно только для выбранного клиента
-        <EditNewModal slug={slug} onClose={handleCloseEditModal} />
+        <div
+          className={`modal-open ${editModalSlug ? "content-under-modal" : ""}`}
+        >
+          <EditNewModal slug={slug} onClose={handleCloseEditModal} />
+        </div>
       )}
     </div>
   );

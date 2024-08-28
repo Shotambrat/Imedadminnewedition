@@ -48,7 +48,6 @@ export default function NewsComp() {
       </div>
       <div className="w-full grid gap-4 grid-cols-1 mdl:grid-cols-2 xl:grid-cols-4 h-auto">
         {currentItems.map((item, i) => (
-          <Link key={i} href={`/news/${item.slug}`}>
             <NewCard
               key={i}
               id={item.id}
@@ -57,7 +56,6 @@ export default function NewsComp() {
               imageSrc={item.head.photo?.url}
               slug={item.slug}
             />
-          </Link>
         ))}
       </div>
       <div className="flex w-full justify-center">

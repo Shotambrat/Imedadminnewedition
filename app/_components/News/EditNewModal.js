@@ -30,12 +30,6 @@ export default function NewsInfo({ slug, onClose }) {
       });
   }, [slug]);
 
-  const handleSave = () => {
-    // Сохранение данных можно будет реализовать здесь, если нужно
-    setHeadModal(false);
-    setOptionModal(false);
-  };
-
   const handleImageChange = (e) => {
     const files = Array.from(e.target.files);
     const images = files.map((file) => file);
@@ -44,7 +38,10 @@ export default function NewsInfo({ slug, onClose }) {
       ...prevItem,
       head: {
         ...prevItem.head,
-        photo: [...prevItem.head.photo, ...images],
+        photo: {
+          ...prevItem.head.photo,
+          url: images[0],
+        },
       },
     }));
   };
@@ -54,7 +51,10 @@ export default function NewsInfo({ slug, onClose }) {
       ...prevItem,
       head: {
         ...prevItem.head,
-        photo: null,
+        photo: {
+          ...prevItem.head.photo,
+          url: null,
+        },
       },
     }));
   };
@@ -86,7 +86,10 @@ export default function NewsInfo({ slug, onClose }) {
         i === index
           ? {
               ...option,
-              photo: [...(option.photo || []), ...images],
+              photo: {
+                ...option.photo || [],
+                url: option.photo?.url || images[0],
+              },
             }
           : option
       ),
@@ -126,7 +129,7 @@ export default function NewsInfo({ slug, onClose }) {
         ru: "",
         en: "",
       },
-      photo: null,
+      photo: {url: null},
       orderNum: activeItem.newOptions.length + 1,
     };
 
@@ -135,6 +138,27 @@ export default function NewsInfo({ slug, onClose }) {
       newOptions: [...prevItem.newOptions, newOption],
     }));
   };
+
+  console.log("ACtiveNews", activeItem);
+
+  const handleSave = async () => {
+    setLoading(true);
+    const authFormData = new FormData();
+    authFormData.append("username", "nasiniemsin");
+    authFormData.append("password", "2x2=xx");
+    const authResponse = await axios.post(
+      "http://213.230.91.55:8130/v1/auth/login",
+      authFormData
+    );
+
+    try {
+      
+    } catch (error) {
+      
+    }
+
+    const token = authResponse.data.data.token;
+  }
 
   if (loading || !activeItem) {
     return (
@@ -229,10 +253,14 @@ export default function NewsInfo({ slug, onClose }) {
                     Фото (необязательно)
                   </label>
                   <div className="flex gap-2">
-                    {activeItem.head.photo ? (
+                    {activeItem.head.photo.url != null ? (
                       <div className="relative">
                         <Image
-                          src={activeItem.head.photo.url}
+                          src={
+                            activeItem.head.photo.url instanceof File
+                              ? URL.createObjectURL(activeItem.head.photo.url)
+                              : activeItem.head.photo.url
+                          }
                           alt={`Фото`}
                           width={80}
                           height={80}
@@ -333,10 +361,10 @@ export default function NewsInfo({ slug, onClose }) {
                       Фото опции (необязательно)
                     </label>
                     <div className="flex gap-2">
-                      {option.photo ? (
+                      {option.photo?.url ? (
                         <div className="relative">
                           <Image
-                            src={URL.createObjectURL(option.photo)}
+                            src={option.photo.url instanceof File ? URL.createObjectURL(option.photo.url) : option.photo.url}
                             alt={`Фото опции ${index}`}
                             width={80}
                             height={80}
@@ -382,18 +410,26 @@ export default function NewsInfo({ slug, onClose }) {
           </div>
         )}
 
-        <div className="flex gap-4">
-          {languages.map((lang, index) => (
-            <button
-              key={index}
-              className={`font-medium border px-4 py-2 rounded-lg text-xl border-red-300 ${
-                lang === activeLang ? "bg-redMain text-white" : ""
-              }`}
-              onClick={() => setActiveLang(lang)}
-            >
-              {lang.toUpperCase()}
-            </button>
-          ))}
+        <div className="flex w-full justify-between">
+          <div className="flex gap-4">
+            {languages.map((lang, index) => (
+              <button
+                key={index}
+                className={`font-medium border px-4 py-2 rounded-lg text-xl border-red-300 ${
+                  lang === activeLang ? "bg-redMain text-white" : ""
+                }`}
+                onClick={() => setActiveLang(lang)}
+              >
+                {lang.toUpperCase()}
+              </button>
+            ))}
+          </div>
+          <button
+            className="text-redMain text-2xl"
+            onClick={() => onClose(false)}
+          >
+            Закрыть
+          </button>
         </div>
         <div className="max-w-[800px] w-full mx-auto flex flex-col gap-8">
           <div className="w-full flex flex-col gap-2 items-start">
@@ -403,10 +439,14 @@ export default function NewsInfo({ slug, onClose }) {
             <p className="whitespace-pre-line">
               {activeItem.head.text[activeLang]}
             </p>
-            {activeItem.head.photo && (
+            {activeItem.head.photo.url && (
               <div className="w-full flex gap-2">
                 <Image
-                  src={activeItem.head.photo.url}
+                  src={
+                    activeItem.head.photo.url instanceof File
+                      ? URL.createObjectURL(activeItem.head.photo.url)
+                      : activeItem.head.photo.url
+                  }
                   alt={`Фото`}
                   width={1000}
                   height={1000}
@@ -431,10 +471,10 @@ export default function NewsInfo({ slug, onClose }) {
                 {option.heading[activeLang]}
               </h2>
               <p className="whitespace-pre-line">{option.text[activeLang]}</p>
-              {option.photo && (
+              {option.photo?.url && (
                 <div className="w-full flex gap-2">
                   <Image
-                    src={URL.createObjectURL(option.photo)}
+                    src={option.photo.url instanceof File ? URL.createObjectURL(option.photo.url): option.photo.url}
                     alt={`Фото опции ${index}`}
                     width={1000}
                     height={1000}
@@ -465,6 +505,20 @@ export default function NewsInfo({ slug, onClose }) {
               Добавить опцию
             </button>
           </div>
+        </div>
+        <div className="mt-12 flex gap-5">
+          <button
+            // onClick={handleSave}
+            className="py-3 text-lg px-4 bg-green-400 font-semibold text-white shadow-xl rounded"
+          >
+            Сохранить
+          </button>
+          <button
+            onClick={() => onClose(false)}
+            className="px-8 py-3 border border-redMain text-lg text-redMain font-semibold"
+          >
+            Отмена
+          </button>
         </div>
       </div>
     </div>
