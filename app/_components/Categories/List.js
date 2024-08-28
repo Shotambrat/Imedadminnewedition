@@ -1,7 +1,7 @@
 'use client'
 
 import CategoryItem from "@/app/_components/Categories/CategoryItem";
-export default  function List({data}) {
+export default function List({data}) {
   return (
     <div className="w-full max-w-[1440px] mx-auto px-2 flex flex-col gap-8">
       <h1 className="text-3xl max-mdx:text-2xl font-semibold uppercase">
