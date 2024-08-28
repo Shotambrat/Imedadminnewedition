@@ -1,159 +1,158 @@
-"use client";
+import { useState, useMemo, useEffect, useCallback } from 'react';
+import Image from 'next/image';
+import { Transition } from '@headlessui/react';
+import upGreen from '@/public/svg/arrow-up-green.svg';
+import downGray from '@/public/svg/arrow-down-gray.svg';
+import { useRouter, useSearchParams, useParams } from 'next/navigation';
 
-import Image from "next/image";
-import { Transition } from "@headlessui/react";
-import { useState } from "react";
-import upGreen from "@/public/svg/arrow-up-green.svg";
-import downGray from "@/public/svg/arrow-down-gray.svg";
-import Link from "next/link";
+// Accordion Item Component
+const AccordionItem = ({ title, isOpen, onClick, children }) => (
+  <div className="border-t border-b border-solid">
+    <summary
+      onClick={onClick}
+      className={`flex gap-5 py-7 ${
+        isOpen ? 'text-redMain' : 'text-black'
+      } font-semibold text-xl max-md:max-w-full cursor-pointer`}
+    >
+      <span className="flex-auto">{title}</span>
+      {isOpen ? (
+        <Image
+          src={upGreen}
+          alt="Up icon"
+          priority
+          width={20}
+          height={20}
+          quality={100}
+        />
+      ) : (
+        <Image
+          src={downGray}
+          alt="Down icon"
+          priority
+          width={20}
+          height={20}
+          quality={100}
+        />
+      )}
+    </summary>
+    <Transition
+      show={isOpen}
+      enter="transition-all duration-500 ease-in-out"
+      enterFrom="max-h-0 opacity-0"
+      enterTo="max-h-screen opacity-100"
+      leave="transition-all duration-500 ease-in-out"
+      leaveFrom="max-h-screen opacity-100"
+      leaveTo="max-h-0 opacity-0"
+    >
+      <div className="overflow-hidden">{children}</div>
+    </Transition>
+  </div>
+);
 
-const AccordionItem = ({ title, isOpen, onClick, children }) => {
-  return (
-    <div className="border-t border-b border-solid">
-      <summary
-        onClick={onClick}
-        className={`flex gap-5 py-7 ${
-          isOpen ? "text-redMain" : "text-black"
-        } font-semibold text-xl  max-md:max-w-full cursor-pointer`}
-      >
-        <span className="flex-auto">{title}</span>
-        {isOpen ? (
-          <Image
-            src={upGreen}
-            alt="Up icon"
-            priority
-            width={20}
-            height={20}
-            quality={100}
-          />
-        ) : (
-          <Image
-            src={downGray}
-            alt="Down icon"
-            priority
-            width={20}
-            height={20}
-            quality={100}
-          />
-        )}
-      </summary>
-      <Transition
-        show={isOpen}
-        enter="transition-all duration-500 ease-in-out"
-        enterFrom="max-h-0 opacity-0"
-        enterTo="max-h-screen opacity-100"
-        leave="transition-all duration-500 ease-in-out"
-        leaveFrom="max-h-screen opacity-100"
-        leaveTo="max-h-0 opacity-0"
-      >
-        <div className="overflow-hidden">{children}</div>
-      </Transition>
-    </div>
+// Accordion Content Component
+const AccordionContent = ({ children }) => (
+  <div className="pb-5 px-4">{children}</div>
+);
+
+// Main CatalogList Component
+export default function CatalogList({ allCotegories }) {
+  const params = useParams();
+  const [openSection, setOpenSection] = useState(null);
+  const [selectedCatalogId, setSelectedCatalogId] = useState(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Automatically open the accordion based on the slug
+  useEffect(() => {
+    const { slug } = params;
+
+    if (slug && allCotegories) {
+      const matchedCategory = allCotegories.data.find(category => category.slug === slug);
+      if (matchedCategory) {
+        setOpenSection(matchedCategory.id);
+      }
+    }
+
+    const openSectionId = searchParams.get('openSection');
+    const catalogId = searchParams.get('catalogId');
+    if (openSectionId) {
+      setOpenSection(Number(openSectionId));
+    }
+    if (catalogId) {
+      setSelectedCatalogId(Number(catalogId));
+    }
+  }, [params.slug, allCotegories, searchParams]);
+
+  // Toggle accordion section and update URL
+  const toggleSection = useCallback(
+    (id, slug) => {
+      const newOpenSection = openSection === id ? null : id;
+      setOpenSection(newOpenSection);
+
+      // Construct the new URL with the slug
+      const newUrl = `${slug}?openSection=${newOpenSection ?? ''}&catalogId=${selectedCatalogId ?? ''}`;
+      router.replace(newUrl, undefined, { shallow: true });
+    },
+    [openSection, selectedCatalogId, router]
   );
-};
 
-const AccordionContent = ({ children }) => {
-  return <div className="pb-5 px-4">{children}</div>;
-};
+  // Handle catalog click and update URL
+  const handleCatalogClick = useCallback(
+    (catalogId, slug) => {
+      setSelectedCatalogId(catalogId);
 
-const data = [
-  {
-    id: 1,
-    name: "УЗД оборудование",
-    slug: "1-ultrasound-diagnostic-systems",
-    active: true,
-    catalogList: [
-      {
-        id: 4,
-        name: "Стационарные",
-        slug: "4-portable",
-        active: true,
-      },
-      {
-        id: 2,
-        name: "Портативные",
-        slug: "2-stationary",
-        active: true,
-      },
-      {
-        id: 3,
-        name: "Фибросканы",
-        slug: "3-fibrocsani",
-        active: true,
-      },
-    ],
-  },
-  {
-    id: 2,
-    name: "Лабороторное оборудование",
-    slug: "2-laboratory-equipment",
-    active: true,
-    catalogList: [
-      {
-        id: 3,
-        name: "Портативные",
-        slug: "3-portable",
-        active: true,
-      },
-    ],
-  },
-  // {
-  //   id: 3,
-  //   name: "Single Equipment",
-  //   slug: "3-single-equipment",
-  //   active: true,
-  //   catalogList: [],
-  // },
-];
+      // Construct the new URL with the slug, openSection, and catalogId
+      const newUrl = `${slug}?openSection=${openSection ?? ''}&catalogId=${catalogId}`;
+      router.replace(newUrl, undefined, { shallow: true });
+    },
+    [openSection, router]
+  );
 
-export default function CatalogList() {
-  const [openSections, setOpenSections] = useState([]);
-
-  const toggleSection = (section) => {
-    setOpenSections((prev) =>
-      prev.includes(section)
-        ? prev.filter((s) => s !== section)
-        : [...prev, section]
-    );
-  };
+  const renderedCategories = useMemo(
+    () =>
+      allCotegories?.data.map(({ id, name, slug, catalogs }) => (
+        <div key={id} className="w-full">
+          {catalogs.length > 0 ? (
+            <AccordionItem
+              title={name}
+              isOpen={openSection === id}
+              onClick={() => toggleSection(id, slug)}
+            >
+              <AccordionContent>
+                <div className="flex flex-col gap-5 text-lg font-semibold text-[#252324] w-full">
+                  {catalogs.map(catalogItem => (
+                    <div
+                      key={catalogItem.id}
+                      className={`cursor-pointer ${
+                        selectedCatalogId === catalogItem.id
+                          ? 'text-red-500'
+                          : 'text-black'
+                      }`}
+                      onClick={() => handleCatalogClick(catalogItem.id, slug)}
+                    >
+                      {catalogItem.name}
+                    </div>
+                  ))}
+                </div>
+              </AccordionContent>
+            </AccordionItem>
+          ) : (
+            <div className="w-full h-full">
+              <div className="py-7 border-t border-b border-solid border-neutral-200">
+                <span className="text-2xl font-bold text-neutral-900">
+                  {name}
+                </span>
+              </div>
+            </div>
+          )}
+        </div>
+      )),
+    [allCotegories, openSection, selectedCatalogId, toggleSection, handleCatalogClick]
+  );
 
   return (
     <section className="w-full">
-      <div className="flex flex-col w-full">
-        {data.map(({ id, name, slug, catalogList }) => (
-          <div key={id} className="w-full">
-            {catalogList.length > 0 ? (
-              <AccordionItem
-                title={name}
-                isOpen={openSections.includes(id)}
-                onClick={() => toggleSection(id)}
-              >
-                <AccordionContent>
-                  <div className="flex flex-col gap-5 text-lg font-semibold text-[#252324] w-full">
-                    {catalogList.map(
-                      (catalogItem) =>
-                        catalogItem.active && (
-                          <div className="cursor-pointer" key={catalogItem.id}>{catalogItem.name}</div>
-                        )
-                    )}
-                  </div>
-                </AccordionContent>
-              </AccordionItem>
-            ) : (
-              <div href={slug} className="w-full h-full">
-                <div
-                  href={slug}
-                  className="py-7 border-t border-b border-solid border-neutral-200"
-                >
-                  <span className="text-2xl font-bold text-neutral-900">
-                    {name}
-                  </span>
-                </div>
-              </div>
-            )}
-          </div>
-        ))}
-      </div>
+      <div className="flex flex-col w-full">{renderedCategories}</div>
     </section>
   );
 }

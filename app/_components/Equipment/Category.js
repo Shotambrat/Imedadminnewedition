@@ -3,13 +3,11 @@ import lab from "@/public/images/equipments/lab-equip.png";
 import colba from "@/public/images/equipments/colba.png";
 import radio from "@/public/images/equipments/radio.png";
 import CategoryItemEq from "@/app/_components/Equipment/CategoryItemEq";
-import Link from "next/link";
-import GreenArrow from "../Buttons/GreenArrow";
 
 export default function Category() {
     const data = [
         {
-            title: "УЗД оборудование",
+            title: "УЗД оборудованиеdfdfsdfsdfsdfdfsdfsfsdfsdf",
             imageSrc: uzi,
             slug: "ultrasound"
         },
