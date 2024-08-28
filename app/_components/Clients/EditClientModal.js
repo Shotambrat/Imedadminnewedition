@@ -123,7 +123,10 @@ const ClientsInfo = ({ slug, onClose }) => {
   const setLogo = (logoFile) => {
     const updatedItem = {
       ...client,
-      logo: logoFile,
+      logo: {
+        ...client.logo,
+        url: logoFile,
+      },
     };
     setClient(updatedItem);
   };
@@ -149,10 +152,32 @@ const ClientsInfo = ({ slug, onClose }) => {
 
     const token = authResponse.data.data.token;
 
+    const updatePhoto = async (a, id) => {
+      const createdImages = [];
+      try {
+        const formData = new FormData();
+        formData.append("photo", a);
+        await axios
+          .put(`http://213.230.91.55:8130/photo/${id}`, formData, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "multipart/form-data",
+            },
+          })
+          .then((response) => createdImages.push(response.data.data.url));
+      } catch (e) {
+        console.error("Error to UPDATE image in server", e);
+        alert("Произошла ошибка при обновлении логотипа");
+      } finally {
+        console.log("Finnaly created imaage", createdImages);
+      }
+      return createdImages;
+    };
+
     const processClientLogo = async () => {
       if (client.logo instanceof File) {
         try {
-          const clientLogo = await createImageInServer([client.logo]);
+          const clientLogo = await updatePhoto(client.logo.url, client.logo.id);
           console.log("ClientLOGGGo", clientLogo);
           client.logo = { url: clientLogo[0] };
         } catch (error) {
@@ -199,6 +224,8 @@ const ClientsInfo = ({ slug, onClose }) => {
       location: client.location.id,
     });
 
+    console.log("JSON", json);
+
     try {
       await axios.put("http://213.230.91.55:8130/v1/client", json, {
         headers: {
@@ -207,20 +234,24 @@ const ClientsInfo = ({ slug, onClose }) => {
         },
       });
 
-      for (const a of galleryDeleteList) {
-        await axios.delete(`http://213.230.91.55:8130/photo/${a}`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+      if (galleryDeleteList.length > 0) {
+        for (const a of galleryDeleteList) {
+          await axios.delete(`http://213.230.91.55:8130/photo/${a}`, {
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          });
+        }
       }
 
       setLoading(false);
       onClose(true);
     } catch (error) {
       console.error("Ошибка при сохранении клиента", error);
-      alert('Проблема в удалении фотографии, попробуйте еще раз или обратитесь к разработчику')
+      alert(
+        "Проблема в удалении фотографии, попробуйте еще раз или обратитесь к разработчику"
+      );
       setLoading(false);
     }
   };
@@ -307,12 +338,7 @@ const ClientsInfo = ({ slug, onClose }) => {
               />
             </div>
             <div className="mb-4">
-              <LogoUploader
-                logo={
-                  client.logo instanceof File ? client.logo : client.logo?.url
-                }
-                setLogo={setLogo}
-              />
+              <LogoUploader logo={client.logo?.url} setLogo={setLogo} />
             </div>
             <div className="mb-4">
               <GalleryUploader
