@@ -5,35 +5,6 @@ module.exports = {
     "./app/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
-    screens: {
-      'sm': '320px',
-      // => @media (min-width: 360px) { ... }
-
-      'md': '360px',
-      // => @media (min-width: 400px) { ... }
-
-      'mdx': '460px',
-      // => @media (min-width: 650px) { ... }
-
-      'mdl': '550px',
-      // => @media (min-width: 750px) { ... }
-
-      'slg': '750px',
-      // => @media (min-width: 900px) { ...
-
-      'lg': '900px',
-      // => @media (min-width: 1100px) { ... }
-
-      'xl': '1000px',
-      // => @media (min-width: 1280px) { ... }
-
-      '2xl': '1100px',
-      // => @media (min-width: 1536px) { ... }
-
-      '3xl': '1440px',
-      // => @media (min-width: 1440px) { ... }
-      '4xl': '1600px',
-    },
     extend: {
       fontFamily: {
         lato: ['Lato', 'sans-serif'],
@@ -46,13 +17,25 @@ module.exports = {
         greentxt: 'var(--Green-Green-100, #088133)',
         blacklighttxt: 'var(--Black-Black50, #808080)',
         snowy: '#F4F7FE',
-        contactBorder: " #E1E1E1",
+        contactBorder: "#E1E1E1",
         redMain: '#E31E24',
         greenCategory: '#E6F2EB',
         modalBg: 'rgba(0, 0, 0, 0.6)',
         subModal: 'rgba(0, 0, 0, 0.8)',
-        contactBg: '#E94B50'
+        contactBg: '#E94B50',
       },
+    },
+    screens: {
+      'sm': '320px',
+      'md': '360px',
+      'mdx': '460px',
+      'mdl': '550px',
+      'slg': '750px',
+      'lg': '900px',
+      'xl': '1000px',
+      '2xl': '1100px',
+      '3xl': '1440px',
+      '4xl': '1600px',
     },
   },
   plugins: [

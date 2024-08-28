@@ -23,12 +23,10 @@ export default function ProductCharacteristics({ data }) {
 	// Handle category change
 	const handleCategoryChange = category => {
 		setActiveCategory(category)
-		switch (category) {
+
+		switch (category.toLowerCase()) {
 			case 'descriptions':
 				setFilteredData(data?.descriptions || [])
-				break
-			case 'conditions':
-				setFilteredData([data?.conditions] || [])
 				break
 			case 'characteristics':
 				setFilteredData(data?.characteristics || [])
@@ -52,7 +50,7 @@ export default function ProductCharacteristics({ data }) {
 								key={index}
 								onClick={() => handleCategoryChange(category)}
 								className={`z-10 w-auto text-lg transition-text font-medium ${
-									activeCategory === category
+									activeCategory.toLowerCase() === category.toLowerCase()
 										? 'text-[#E31E24] border-b-2 border-b-[#E31E24]'
 										: 'text-neutral-400'
 								}`}
@@ -66,14 +64,13 @@ export default function ProductCharacteristics({ data }) {
 			</div>
 
 			<div>
-				{activeCategory === 'descriptions' &&
+				{activeCategory.toLowerCase() === 'descriptions' &&
 					filteredData.map((item, i) => (
 						<div key={i} className='text-lg leading-5'>
 							<p>{item.value?.ru}</p>
 						</div>
 					))}
-
-				{activeCategory === 'characteristics' &&
+				{activeCategory.toLowerCase() === 'characteristics' &&
 					filteredData.map((item, i) => (
 						<div key={i} className='w-full flex gap-3'>
 							<p className='w-full text-neutral-400 max-w-[100px] md:max-w-[150px] mdx:max-w-[200px] lg:max-w-[400px]'>
@@ -84,7 +81,7 @@ export default function ProductCharacteristics({ data }) {
 							</div>
 						</div>
 					))}
-				{activeCategory === 'clients' && (
+				{activeCategory.toLowerCase() === 'clients' && (
 					<div className='grid grid-cols-1 lg:grid-cols-2 gap-4'>
 						{filteredData.map((client, index) => (
 							<div key={index} className='border p-4 flex'>
@@ -120,7 +117,6 @@ export default function ProductCharacteristics({ data }) {
 					</div>
 				)}
 			</div>
-
 			<div className='flex justify-start mt-2'>
 				<button
 					className='bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]'
@@ -129,7 +125,6 @@ export default function ProductCharacteristics({ data }) {
 					Прикрепленные файлы
 				</button>
 			</div>
-
 			<Modal
 				selectedAttachedFiles={selectedAttachedFiles}
 				closeModal={closeModal}

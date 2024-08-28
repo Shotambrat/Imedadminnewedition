@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import CatalogList from "./CatalogBar";
 import CatalogItem from "./Catalogitem";
 import Dropdown from "./DropDown";
@@ -7,21 +7,32 @@ import Category from "../Modal/Category";
 import { ChevronDownIcon } from "@heroicons/react/20/solid";
 import ProductMain from '../AdminModal/Products/ProductMain';
 
-const List = ({ data, allCotegories, productWithCatalogID }) => {
+const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId }) => {
   const [categoryModal, setCategoryModal] = useState(false);
   const [displayAll, setDisplayAll] = useState(false);
   const [adminModal, setAdminModal] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState("Все товары");
   const [filteredData, setFilteredData] = useState([]);
 
+  // Ma'lumotlar o'zgarishi bilan komponentni qayta render qilish
   useEffect(() => {
-    // Set initial filtered data based on productWithCatalogID
-    setFilteredData(productWithCatalogID?.data || []);
-  }, [productWithCatalogID]);
+    // Initially load data based on the presence of productWithCatalogID or productWithCategoryId
+    if (productWithCatalogID?.data && !productWithCategoryId?.data) {
+      setFilteredData(productWithCatalogID.data);
+    } else if (!productWithCatalogID?.data && productWithCategoryId?.data) {
+      setFilteredData(productWithCategoryId.data);
+    } else if (productWithCatalogID?.data && productWithCategoryId?.data) {
+      setFilteredData(productWithCatalogID.data); // Prioritize CatalogID data if both are present
+    } else {
+      setFilteredData([]);
+    }
+  }, [productWithCatalogID, productWithCategoryId]);
 
-  const handleFilter = (category) => {
+  // Handle filter changes
+  const handleFilter = useCallback((category) => {
     setSelectedCategory(category);
-    const items = productWithCatalogID?.data || [];
+    let items = filteredData;
+
     switch (category) {
       case "Новинки":
         setFilteredData(items.filter((item) => item.new));
@@ -35,15 +46,24 @@ const List = ({ data, allCotegories, productWithCatalogID }) => {
         break;
     }
     setDisplayAll(false);
-  };
+  }, [filteredData]);
+
+  // Clear productWithCategoryId data and use productWithCatalogID data
+  const handleCatalogOpen = useCallback((id) => {
+    if (productWithCatalogID?.data && id === productWithCatalogID.catalogId) {
+      setFilteredData(productWithCatalogID.data);
+    } else if (productWithCategoryId?.data && id === productWithCategoryId.categoryId) {
+      setFilteredData(productWithCategoryId.data);
+    } else {
+      setFilteredData([]); // Clear data if no matching ID
+    }
+  }, [productWithCatalogID, productWithCategoryId]);
 
   const handleClose = () => setCategoryModal(false);
   const handleLoadMore = () => setDisplayAll(true);
 
-  const getFilteredData = () => {
-    const dataToDisplay = displayAll ? filteredData : filteredData.slice(0, 10);
-    return dataToDisplay;
-  };
+  // Get filtered data for rendering
+  const getFilteredData = () => displayAll ? filteredData : filteredData.slice(0, 10);
 
   return (
     <div className="w-full max-w-[1440px] mx-auto flex flex-col lg:gap-20 gap-5 px-2 py-24">
@@ -86,7 +106,11 @@ const List = ({ data, allCotegories, productWithCatalogID }) => {
 
       <div className="w-full flex gap-10">
         <div className="w-full max-w-[350px] max-2xl:max-w-[280px] max-lg:hidden">
-          <CatalogList data={data} allCotegories={allCotegories} />
+          <CatalogList
+            data={data}
+            allCotegories={allCotegories}
+            onCatalogOpen={handleCatalogOpen} // Call handleCatalogOpen when catalog is opened
+          />
         </div>
         <div>
           <div className="w-full grid grid-cols-1 mdl:grid-cols-2 3xl:grid-cols-3 gap-4">
@@ -115,7 +139,7 @@ const List = ({ data, allCotegories, productWithCatalogID }) => {
               +
             </button>
           </div>
-          {!displayAll && (
+          {!displayAll && filteredData.length > 10 && (
             <div className="flex justify-center mt-[50px] mdx:mt-[70px]">
               <button
                 className="border p-3 text-[14px] mdx:text-[16px] px-[50px] hover:bg-[#F9D2D3] font-bold"

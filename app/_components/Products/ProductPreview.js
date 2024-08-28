@@ -50,7 +50,7 @@ export default function ProductPreview({productData}) {
             width={300}
             height={300}
             alt="Mindray"
-            className="w-32 h-10"
+            className="w-[150px] h-[60px]"
           />
         </div>
         <div className="flex gap-4">
