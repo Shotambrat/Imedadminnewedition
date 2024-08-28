@@ -5,10 +5,15 @@ import Link from "next/link";
 import GreenArrow from "../Buttons/GreenArrow";
 import fav from "@/public/svg/main/fav.svg"
 import favFilled from "@/public/svg/main/fav-filled.svg"
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import EditProductModal from "./EditProductModal"
 
 export default function Catalogitem({ new: isNew, sale, image, title, description, price, slug  , discount}) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [isMdx, setIsMdx] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editModalSlug, setEditModalSlug] = useState(null);
+
   useEffect(() => {
     const handleResize = () => {
       setIsMdx(window.innerWidth >= 460); // mdx breakpoint is 768px in Tailwind
@@ -39,9 +44,17 @@ export default function Catalogitem({ new: isNew, sale, image, title, descriptio
     setIsFavorite(!isFavorite);
   };
 
+  
+  const handleEditClick = (slug) => {
+    setEditModalSlug(slug); // Устанавливаем slug выбранного клиента
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalSlug(null); // Закрываем модальное окно
+  };
   return (
     <div className="h-[290px] mdx:h-[440px] w-full ">
-      <div className="rounded-2xl  mdx:pt-8 flex flex-col justify-between mdx:p-2 mdl:p-4 h-full relative">
+      <div className="rounded-2xl  mdx:pt-8 flex flex-col justify-between mdx:p-2 mdl:p-4 h-full relative group">
         <div onClick={handleFavoriteToggle} className="absolute top-4 right-4 z-10">
           <Image
             src={isFavorite ? favFilled : fav}
@@ -87,6 +100,26 @@ export default function Catalogitem({ new: isNew, sale, image, title, descriptio
             </div>
           )} */}
         </div>
+        <button
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleEditClick(slug)
+          }} // Устанавливаем slug при клике
+        >
+          Edit Info
+        </button>
+        <button
+          className="px-4 py-2 bg-red-500 text-white rounded-lg"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            setShowDeleteModal(true)
+          }}
+        >
+          Delete
+        </button>
       </div>
     </div>
   );
