@@ -31,8 +31,9 @@ const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId
   // Handle filter changes
   const handleFilter = useCallback((category) => {
     setSelectedCategory(category);
-    let items = filteredData;
-
+  
+    let items = productWithCatalogID?.data || productWithCategoryId?.data || [];
+  
     switch (category) {
       case "Новинки":
         setFilteredData(items.filter((item) => item.new));
@@ -46,7 +47,7 @@ const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId
         break;
     }
     setDisplayAll(false);
-  }, [filteredData]);
+  }, [productWithCatalogID, productWithCategoryId]);
 
   // Clear productWithCategoryId data and use productWithCatalogID data
   const handleCatalogOpen = useCallback((id) => {
@@ -68,7 +69,7 @@ const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId
   return (
     <div className="w-full max-w-[1440px] mx-auto flex flex-col lg:gap-20 gap-5 px-2 py-24">
       {adminModal && <ProductMain closeModal={setAdminModal} />}
-      {categoryModal && <Category handleClose={handleClose} />}
+      {categoryModal && <Category handleClose={handleClose} allCotegories={allCotegories} />}
       
       <div className="w-full flex flex-col lg:flex-row lg:justify-between gap-5">
         <h1 className="text-3xl max-mdx:text2xl font-semibold">КАТАЛОГ</h1>
@@ -81,6 +82,7 @@ const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId
             <ChevronDownIcon className="w-5 h-5 ml-2 -mr-1" aria-hidden="true" />
           </button>
           <Dropdown handleFilter={handleFilter} />
+
           <div className="w-full flex-col gap-2 hidden lg:flex">
             <div className="hidden lg:flex flex-col relative items-end">
               <div className="overflow-x-scroll gap-4 lg:gap-6 scrollbar-hide touch-auto hidden lg:flex">
@@ -109,7 +111,7 @@ const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId
           <CatalogList
             data={data}
             allCotegories={allCotegories}
-            onCatalogOpen={handleCatalogOpen} // Call handleCatalogOpen when catalog is opened
+            onCatalogOpen={handleCatalogOpen}
           />
         </div>
         <div>

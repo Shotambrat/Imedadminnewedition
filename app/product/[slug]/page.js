@@ -14,7 +14,7 @@ export async function generateMetadata({ params }) {
 		const response = await axios.get(
 			`http://213.230.91.55:8130/v1/product/${slug}`
 		)
-		console.log(response.data)
+		
 		return {
 			title: response.data.name, // Example of metadata usage
 		}
@@ -43,14 +43,15 @@ export default async function Page({ params }) {
 
 	return (
 		<div className='w-full bg-white flex flex-col gap-56 pt-12 '>
-			{productData.data.videos && productData.data.videos.length > 0 ? (
+			{productData && productData.data?.videos?.length > 0 ? (
 				<VideoReview videos={productData.data.videos} />
 			) : null}
-			<ProductInfo productData={productData.data} />
-			{productData.data.reviews && productData.data.reviews.length > 0 ? (
+
+			{productData && <ProductInfo productData={productData.data} />}
+
+			{productData && productData.data?.reviews?.length > 0 ? (
 				<Recenzii reviews={productData.data.reviews} />
 			) : null}
-
 			<AlsoTake />
 			<Similar />
 			<Application />

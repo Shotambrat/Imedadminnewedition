@@ -9,7 +9,6 @@ export default function ProductCharacteristics({ data }) {
 	const [activeCategory, setActiveCategory] = useState('descriptions')
 	const [filteredData, setFilteredData] = useState(data?.descriptions || [])
 	const [selectedAttachedFiles, setSelectedAttachedFiles] = useState(null)
-
 	// Open modal with selected files
 	const openModal = files => {
 		setSelectedAttachedFiles(files)
