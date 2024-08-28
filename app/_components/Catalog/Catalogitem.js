@@ -70,6 +70,7 @@ export default function Catalogitem({ new: isNew, sale, image, title, descriptio
             width={200}
             height={200}
             className="object-contain w-full h-full"
+            quality={100}
           />
         </div>
         <h3 className="text-md font-semibold ">
