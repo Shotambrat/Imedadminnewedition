@@ -1,109 +1,52 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
-import partnerPhoto1 from "@/public/images/clients/image1.png";
 import GreenArrow from "../Buttons/GreenArrow";
 import ClientsMain from "@/app/_components/AdminModal/Clients/ClientsMain";
-
-const clients = [
-  {
-    id: 1,
-    imageSrc: partnerPhoto1,
-    title: "Browiner",
-    description:
-      "Browiner is one of the leading suppliers of medical devices and solutions in the field of mobile digital radiography",
-    link: "browiner",
-  },
-  {
-    id: 2,
-    imageSrc: partnerPhoto1,
-    title: "United Imaging",
-    description:
-      "United Imaging is a leading global developer and manufacturer of advanced medical imaging and radiotherapy equipment",
-    link: "imaging",
-  },
-  {
-    id: 3,
-    imageSrc: partnerPhoto1,
-    title: "Zoncare Global",
-    description:
-      "Zoncare is a leading high-tech medical device manufacturer and supplier located in the Optical Valley of China",
-    link: "zoncare",
-  },
-  {
-    id: 4,
-    imageSrc: partnerPhoto1,
-    title: "Mindray",
-    description:
-      "Mindray is a global leader in the development and manufacture of medical devices and solutions",
-    link: "mindray",
-  },
-  {
-    id: 5,
-    imageSrc: partnerPhoto1,
-    title: "Hefei Shendeng Medical Equipment Co.",
-    description: "Is a leading provider of medical equipment and solutions",
-    link: "Shendeng",
-  },
-  {
-    id: 6,
-    imageSrc: partnerPhoto1,
-    title: "lingen",
-    description:
-      "Lingen Precision Medical Products Co., Ltd. is a custom manufacturer specializing in medical products",
-    link: "lingen",
-  },
-  {
-    id: 7,
-    imageSrc: partnerPhoto1,
-    title: "Partner 7",
-    description: "Description for partner 7",
-    link: "partner7",
-  },
-  {
-    id: 8,
-    imageSrc: partnerPhoto1,
-    title: "Partner 8",
-    description: "Description for partner 8",
-    link: "partner8",
-  },
-  {
-    id: 9,
-    imageSrc: partnerPhoto1,
-    title: "Partner 9",
-    description: "Description for partner 9",
-    link: "partner9",
-  },
-  {
-    id: 10,
-    imageSrc: partnerPhoto1,
-    title: "Partner 10",
-    description: "Description for partner 10",
-    link: "partner10",
-  },
-  {
-    id: 11,
-    imageSrc: partnerPhoto1,
-    title: "Partner 11",
-    description: "Description for partner 11",
-    link: "partner11",
-  },
-  {
-    id: 12,
-    imageSrc: partnerPhoto1,
-    title: "Partner 12",
-    description: "Description for partner 12",
-    link: "partner12",
-  },
-];
+import axios from "axios";
+import DeleteConfirmationModal from "./DeleteConfirmationModal";
+import EditClientModal from "./EditClientModal";
 
 export default function ListClients() {
   const [visibleCount, setVisibleCount] = useState(6);
   const [adminModal, setAdminModal] = useState(false);
+  const [clients, setClients] = useState([]);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editModalSlug, setEditModalSlug] = useState(null);
+
+  useEffect(() => {
+    try {
+      axios
+        .get("https://imed.uz/api/v1/client/all", {
+          headers: {
+            "Accept-Language": "uz",
+          },
+        })
+        .then((response) => {
+          return response.data;
+        })
+        .then((data) => setClients(data.data))
+        .catch((e) => {
+          throw Error("Ошибка при загрузке данных", e);
+        });
+    } catch (error) {
+      console.log(error);
+    }
+  }, []);
+
+  console.log("Clients", clients);
 
   const showMoreClients = () => {
     setVisibleCount(clients.length);
+  };
+
+  const handleEditClick = (slug) => {
+    setEditModalSlug(slug); // Устанавливаем slug выбранного клиента
+  };
+
+  const handleCloseEditModal = () => {
+    setEditModalSlug(null); // Закрываем модальное окно
   };
 
   return (
@@ -124,31 +67,59 @@ export default function ListClients() {
         {clients.slice(0, visibleCount).map((card) => (
           <div
             key={card.id}
-            className="bg-white p-4 w-full border-[1px] border-gray-200 mdx:p-0 mdl:p-5 slg:h-auto"
+            className="bg-white p-4 w-full border-[1px] border-gray-200 mdx:p-0 mdl:p-5 slg:h-auto relative group"
           >
             <div className="mdx:flex mdx:flex-row items-center justify-between ">
-              <div className="mdx:w-[50%] h-[70px] relative mt-3">
+              <div className="mdx:w-[50%] h-full relative flex justify-center">
                 <Image
-                  src={card.imageSrc}
-                  alt={card.title}
-                  layout="fill"
-                  objectFit="contain"
+                  src={card.logo.url}
+                  alt={card.name}
+                  height={1000}
+                  width={1000}
+                  className="w-[70%] h-auto object-contain"
                 />
               </div>
               <div className="mdx:mb-4 mdx:w-[50%]">
                 <h2 className="text-xl font-bold right mt-4 mdx:mb-2 xl:text-[28px]">
-                  {card.title}
+                  {card.name}
                 </h2>
                 <p className="mb-4 text-gray-600 xl:text-[18px]">
-                  {card.description}
+                  {card.description.slice(0, 100)}
                 </p>
-                <Link href={`/clients/${card.link}`}>
+                <Link href={`/clients/${card.slug}`}>
                   <span className="text-[#E31E24] font-semibold mdx:text-[18px]">
                     <GreenArrow title={"Подробнее"} />
                   </span>
                 </Link>
               </div>
             </div>
+            <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <button
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg"
+                onClick={() => handleEditClick(card.slug)} // Устанавливаем slug при клике
+              >
+                Edit Info
+              </button>
+              <button
+                className="px-4 py-2 bg-red-500 text-white rounded-lg"
+                onClick={() => setShowDeleteModal(true)}
+              >
+                Delete
+              </button>
+            </div>
+            {showDeleteModal && (
+              <DeleteConfirmationModal
+                productId={card.id}
+                onClose={() => setShowDeleteModal(false)}
+              />
+            )}
+
+            {editModalSlug === card.slug && ( // Открываем модальное окно только для выбранного клиента
+              <EditClientModal
+                slug={card.slug}
+                onClose={handleCloseEditModal}
+              />
+            )}
           </div>
         ))}
       </div>

@@ -71,7 +71,7 @@ const LocationDropdown = ({ locations, setLocations, selectedLocation, setSelect
         className="w-full bg-white border border-gray-300 rounded px-4 py-2 text-left"
       >
         {selectedLocation
-          ? `${selectedLocation.country} - ${selectedLocation.city}`
+          ? `${selectedLocation.country.uz !== undefined ? selectedLocation.country.uz : selectedLocation.country } - ${selectedLocation.city.uz !== undefined ? selectedLocation.city.uz : selectedLocation.city}`
           : "Выберите локацию"}
       </button>
       {isDropdownOpen && (

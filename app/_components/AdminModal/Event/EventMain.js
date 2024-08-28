@@ -73,8 +73,8 @@ export default function EventMain({ closeModal }) {
 
   const handleChangeActiveId = (id) => {
     const updatedItem = createdList.find((item) => item.id === id);
-    setActiveId(id);
     setActiveItem(updatedItem);
+    setActiveId(id);
   };
 
   const handleAddEvent = () => {

@@ -10,6 +10,7 @@ export default function ProductInfo({
   languages,
   activeLang,
   setActiveLang,
+  createdList
 }) {
   return (
     <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-16 px-2">
@@ -33,6 +34,7 @@ export default function ProductInfo({
         languages={languages}
         activeLang={activeLang}
         setActiveLang={setActiveLang}
+        createdList={createdList}
       />
       <ProductCharacteristics
         setCreatedList={setCreatedList}

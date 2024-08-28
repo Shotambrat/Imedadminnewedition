@@ -330,6 +330,13 @@ export default function ProductCharacteristics({
               ))
             )}
             <div className="flex justify-end gap-4">
+
+              <button
+                onClick={handleAddBlock}
+                className="py-2 px-4 bg-blue-500 text-white rounded"
+              >
+                Добавить блок
+              </button>
               <button
                 onClick={handleSave}
                 className="py-2 px-4 bg-blue-500 text-white rounded"

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import VerticalCarousel from "./VerticalCarousel";
 import ProductPreviewEditModal from "./ProductPreviewEditModal";
@@ -10,6 +10,7 @@ export default function ProductPreview({
   languages,
   activeLang,
   setActiveLang,
+  createdList,
 }) {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
@@ -21,23 +22,35 @@ export default function ProductPreview({
     setIsEditModalOpen(false);
   };
 
-  const handleGalleryUpdate = (newGallery) => {
+  const handleGalleryUpdate = useCallback((newGallery) => {
     setActiveItem((prevItem) => ({
       ...prevItem,
       gallery: newGallery,
     }));
-  };
+
+    setCreatedList((prevItems) =>
+      prevItems.map((item) =>
+        item.id === activeItem.id
+          ? {
+              ...item,
+              gallery: newGallery,
+            }
+          : item
+      )
+    );
+  }, [activeItem.id, setActiveItem, setCreatedList]);
 
   const finalPrice =
     activeItem.sale && activeItem.discount > 0
       ? Math.round(activeItem.originalPrice * (1 - activeItem.discount / 100))
       : activeItem.originalPrice;
 
+      
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6">
       <div className="flex-1 w-full">
         <VerticalCarousel
-          images={activeItem.gallery}
+          images={activeItem.gallery} // Используем галерею напрямую из activeItem
           onGalleryUpdate={handleGalleryUpdate}
         />
       </div>
