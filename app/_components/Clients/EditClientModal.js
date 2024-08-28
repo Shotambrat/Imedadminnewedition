@@ -7,7 +7,7 @@ import axios from "axios";
 import { DNA } from "react-loader-spinner";
 
 const ClientsInfo = ({ slug, onClose }) => {
-  const [client, setClient] = useState(null); // Инициализация как null, чтобы показать, что данных еще нет
+  const [client, setClient] = useState(null);
   const [activeLang, setActiveLang] = useState("uz");
   const [locations, setLocations] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -156,7 +156,7 @@ const ClientsInfo = ({ slug, onClose }) => {
       const createdImages = [];
       try {
         const formData = new FormData();
-        formData.append("photo", a);
+        formData.append("new-photo", a);
         await axios
           .put(`http://213.230.91.55:8130/photo/${id}`, formData, {
             headers: {
@@ -171,6 +171,7 @@ const ClientsInfo = ({ slug, onClose }) => {
       } finally {
         console.log("Finnaly created imaage", createdImages);
       }
+      console.log("UpdatedlOGO", createdImages)
       return createdImages;
     };
 

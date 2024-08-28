@@ -33,7 +33,11 @@ export default function NewCard({ key, id, title, date, imageSrc, slug }) {
       <div className="absolute bottom-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
         <button
           className="px-4 py-2 bg-blue-500 text-white rounded-lg"
-          onClick={() => handleEditClick(slug)} // Устанавливаем slug при клике
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            handleEditClick(slug)
+          }} // Устанавливаем slug при клике
         >
           Edit Info
         </button>
