@@ -4,8 +4,8 @@ import "react-image-gallery/styles/css/image-gallery.css";
 
 const VerticalCarousel = ({ images, onGalleryUpdate }) => {
   const galleryItems = images.map((src, index) => ({
-    original: src,
-    thumbnail: src,
+    original: src instanceof File ? URL.createObjectURL(src) : src.url,
+    thumbnail: src instanceof File ? URL.createObjectURL(src) : src.url,
     thumbnailLabel: (
       <button
         className="delete-button"
@@ -18,7 +18,7 @@ const VerticalCarousel = ({ images, onGalleryUpdate }) => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map((file) => URL.createObjectURL(file));
+    const newImages = files.map(file => file);
     onGalleryUpdate([...images, ...newImages]);
   };
 
@@ -29,7 +29,7 @@ const VerticalCarousel = ({ images, onGalleryUpdate }) => {
   };
 
   return (
-    <div className="w-full">
+    <div className="w-full vertical-carousel">
       <ImageGallery
         items={galleryItems}
         showThumbnails={true}
@@ -37,6 +37,7 @@ const VerticalCarousel = ({ images, onGalleryUpdate }) => {
         showPlayButton={false}
         showNav={false}
         additionalClass="custom-gallery"
+        thumbnailPosition="left" // Миниатюры расположены слева
         renderThumbInner={(item) => (
           <div style={{ position: "relative" }}>
             <img

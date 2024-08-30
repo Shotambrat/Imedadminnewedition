@@ -3,12 +3,7 @@ import Image from "next/image";
 import close from "@/public/svg/close.svg";
 import fileIcon from "@/public/svg/filered.svg";
 
-const Modal = ({
-  closeModal,
-  setCreatedList,
-  activeItem,
-  setActiveItem,
-}) => {
+const Modal = ({ closeModal, activeItem, setActiveItem }) => {
   const [uploadedFiles, setUploadedFiles] = useState([...activeItem.files]);
 
   const handleFileUpload = (e) => {
@@ -30,12 +25,6 @@ const Modal = ({
   const handleSaveFiles = () => {
     const updatedItem = { ...activeItem, files: uploadedFiles };
     setActiveItem(updatedItem);
-
-    // Update the createdList to reflect the new files
-    setCreatedList((prevList) =>
-      prevList.map((item) => (item.id === activeItem.id ? updatedItem : item))
-    );
-
     closeModal();
   };
 

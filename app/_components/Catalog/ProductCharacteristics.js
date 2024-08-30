@@ -1,11 +1,9 @@
+import Modal from "./AttachedFiles";
 import { useState, useEffect } from "react";
 import Image from "next/image";
-import arrowred from "@/public/svg/arrow-right-red.svg";
-import Modal from "./AttachedFiles";
 import axios from "axios";
 
 export default function ProductCharacteristics({
-  setCreatedList,
   activeItem,
   setActiveItem,
   languages,
@@ -80,39 +78,67 @@ export default function ProductCharacteristics({
 
   const handleChange = (e, index, field) => {
     const { name, value } = e.target;
-    const updatedContent = [...modalContent];
-    updatedContent[index][field][name] = value;
-    setModalContent(updatedContent);
+    setActiveItem((prevItem) => {
+      // Ensure prevItem[editType] is an array
+      if (!Array.isArray(prevItem[editType])) {
+        return prevItem; // Exit early if it's not an array
+      }
+  
+      const updatedContent = [...prevItem[editType]];
+      updatedContent[index][field][name] = value;
+  
+      return {
+        ...prevItem,
+        [editType]: updatedContent,
+      };
+    });
   };
-
+  
   const handleAddBlock = () => {
-    setModalContent((prevContent) => [
-      ...prevContent,
-      { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
-    ]);
+    setActiveItem((prevItem) => {
+      // Ensure prevItem[editType] is an array
+      if (!Array.isArray(prevItem[editType])) {
+        return prevItem; // Exit early if it's not an array
+      }
+  
+      const updatedContent = [
+        ...prevItem[editType],
+        { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
+      ];
+  
+      return {
+        ...prevItem,
+        [editType]: updatedContent,
+      };
+    });
   };
-
+  
   const handleRemoveBlock = (index) => {
-    const updatedContent = modalContent.filter((_, i) => i !== index);
-    setModalContent(updatedContent);
+    setActiveItem((prevItem) => {
+      // Ensure prevItem[editType] is an array
+      if (!Array.isArray(prevItem[editType])) {
+        return prevItem; // Exit early if it's not an array
+      }
+  
+      const updatedContent = prevItem[editType].filter((_, i) => i !== index);
+  
+      return {
+        ...prevItem,
+        [editType]: updatedContent,
+      };
+    });
   };
 
   const handleSave = () => {
-    const updatedItem = { ...activeItem };
-    if (editType === "description") {
-      updatedItem.descriptions = modalContent;
-    } else if (editType === "characteristics") {
-      updatedItem.characteristics = modalContent;
-    } else if (editType === "clients") {
-      updatedItem.clients = clients.filter((client) =>
-        selectedClients.includes(client.id)
-      );
+    if (editType === "clients") {
+      setActiveItem((prevItem) => ({
+        ...prevItem,
+        clients: clients.filter((client) =>
+          selectedClients.includes(client.id)
+        ),
+      }));
     }
 
-    setActiveItem(updatedItem);
-    setCreatedList((prevList) =>
-      prevList.map((item) => (item.id === activeItem.id ? updatedItem : item))
-    );
     handleCloseModal();
   };
 
@@ -330,7 +356,6 @@ export default function ProductCharacteristics({
               ))
             )}
             <div className="flex justify-end gap-4">
-
               <button
                 onClick={handleAddBlock}
                 className="py-2 px-4 bg-blue-500 text-white rounded"
@@ -364,7 +389,6 @@ export default function ProductCharacteristics({
       </div>
       {modal && (
         <Modal
-          setCreatedList={setCreatedList}
           activeItem={activeItem}
           setActiveItem={setActiveItem}
           closeModal={closeModal}

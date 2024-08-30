@@ -14,12 +14,6 @@ export default function ProductPreviewEditModal({
   const [categories, setCategories] = useState([]);
   const [catalogs, setCatalogs] = useState([]);
 
-  const [localData, setLocalData] = useState({
-    name: activeItem.name,
-    shortDescription: activeItem.shortDescription,
-    conditions: activeItem.conditions,
-  });
-
   const {
     register,
     handleSubmit,
@@ -31,15 +25,19 @@ export default function ProductPreviewEditModal({
       brand: activeItem.brand?.id || '',
       category: activeItem.category?.id || '',
       catalog: activeItem.catalog?.id || '',
+      originalPrice: activeItem.originalPrice,
+      discount: activeItem.discount,
+      sale: activeItem.sale,
+      new: activeItem.new,
+      technical: activeItem.technical,
+      active: activeItem.active,
+      popular: activeItem.popular,
     },
   });
 
   const onSubmit = (data) => {
     const updatedItem = {
       ...activeItem,
-      name: localData.name,
-      shortDescription: localData.shortDescription,
-      conditions: localData.conditions,
       originalPrice: data.originalPrice,
       discount: data.discount,
       sale: data.sale,
@@ -50,7 +48,6 @@ export default function ProductPreviewEditModal({
       brand: { id: data.brand },
       category: data.category ? { id: data.category } : null,
       catalog: data.catalog ? { id: data.catalog } : null,
-      gallery: activeItem.gallery,
     };
 
     if (!updatedItem.category && !updatedItem.catalog) {
@@ -99,10 +96,10 @@ export default function ProductPreviewEditModal({
 
   const handleInputChange = (e, lang, field) => {
     const value = e.target.value;
-    setLocalData((prevData) => ({
-      ...prevData,
+    setActiveItem((prevItem) => ({
+      ...prevItem,
       [field]: {
-        ...prevData[field],
+        ...prevItem[field],
         [lang]: value,
       },
     }));
@@ -135,7 +132,7 @@ export default function ProductPreviewEditModal({
               Название ({activeLang.toUpperCase()})
             </label>
             <input
-              value={localData.name[activeLang]}
+              value={activeItem.name[activeLang]}
               onChange={(e) => handleInputChange(e, activeLang, 'name')}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -147,7 +144,7 @@ export default function ProductPreviewEditModal({
               Краткое описание ({activeLang.toUpperCase()})
             </label>
             <textarea
-              value={localData.shortDescription[activeLang]}
+              value={activeItem.shortDescription[activeLang]}
               onChange={(e) => handleInputChange(e, activeLang, 'shortDescription')}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -159,7 +156,7 @@ export default function ProductPreviewEditModal({
               Условия ({activeLang.toUpperCase()})
             </label>
             <textarea
-              value={localData.conditions[activeLang]}
+              value={activeItem.conditions[activeLang]}
               onChange={(e) => handleInputChange(e, activeLang, 'conditions')}
               className="w-full p-2 border border-gray-300 rounded"
             />
@@ -214,7 +211,10 @@ export default function ProductPreviewEditModal({
               <button
                 type="button"
                 onClick={() =>
-                  setValue("new", !watch("new"))
+                  setActiveItem((prevItem) => ({
+                    ...prevItem,
+                    new: !prevItem.new,
+                  }))
                 }
                 className={`px-4 py-2 text-sm font-semibold rounded ${
                   watch("new") ? "bg-green-500 text-white" : "bg-gray-200"
@@ -225,7 +225,10 @@ export default function ProductPreviewEditModal({
               <button
                 type="button"
                 onClick={() =>
-                  setValue("sale", !watch("sale"))
+                  setActiveItem((prevItem) => ({
+                    ...prevItem,
+                    sale: !prevItem.sale,
+                  }))
                 }
                 className={`px-4 py-2 text-sm font-semibold rounded ${
                   watch("sale") ? "bg-green-500 text-white" : "bg-gray-200"
@@ -236,7 +239,10 @@ export default function ProductPreviewEditModal({
               <button
                 type="button"
                 onClick={() =>
-                  setValue("technical", !watch("technical"))
+                  setActiveItem((prevItem) => ({
+                    ...prevItem,
+                    technical: !prevItem.technical,
+                  }))
                 }
                 className={`px-4 py-2 text-sm font-semibold rounded ${
                   watch("technical")
@@ -249,7 +255,10 @@ export default function ProductPreviewEditModal({
               <button
                 type="button"
                 onClick={() =>
-                  setValue("active", !watch("active"))
+                  setActiveItem((prevItem) => ({
+                    ...prevItem,
+                    active: !prevItem.active,
+                  }))
                 }
                 className={`px-4 py-2 text-sm font-semibold rounded ${
                   watch("active") ? "bg-green-500 text-white" : "bg-gray-200"
@@ -260,7 +269,10 @@ export default function ProductPreviewEditModal({
               <button
                 type="button"
                 onClick={() =>
-                  setValue("popular", !watch("popular"))
+                  setActiveItem((prevItem) => ({
+                    ...prevItem,
+                    popular: !prevItem.popular,
+                  }))
                 }
                 className={`px-4 py-2 text-sm font-semibold rounded ${
                   watch("popular") ? "bg-green-500 text-white" : "bg-gray-200"

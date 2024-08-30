@@ -11,139 +11,139 @@ export default function Reviews({
   activeLang,
   setActiveLang,
 }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalContent, setModalContent] = useState({
-    nameDoctor: { uz: "", ru: "", en: "" },
-    position: { uz: "", ru: "", en: "" },
-    options: [
-      {
-        title: { uz: "", ru: "", en: "" },
-        value: { uz: "", ru: "", en: "" },
-      },
-    ],
-    avatarImage: "",
-  });
+  // const [isModalOpen, setIsModalOpen] = useState(false);
+  // const [modalContent, setModalContent] = useState({
+  //   nameDoctor: { uz: "", ru: "", en: "" },
+  //   position: { uz: "", ru: "", en: "" },
+  //   options: [
+  //     {
+  //       title: { uz: "", ru: "", en: "" },
+  //       value: { uz: "", ru: "", en: "" },
+  //     },
+  //   ],
+  //   avatarImage: "",
+  // });
 
-  const [editType, setEditType] = useState(null);
+  // const [editType, setEditType] = useState(null);
 
-  const handleOpenModal = (content = {}, type) => {
-    setModalContent(
-      content && content.nameDoctor
-        ? content
-        : {
-            nameDoctor: { uz: "", ru: "", en: "" },
-            position: { uz: "", ru: "", en: "" },
-            options: [
-              {
-                title: { uz: "", ru: "", en: "" },
-                value: { uz: "", ru: "", en: "" },
-              },
-            ],
-            avatarImage: "",
-          }
-    );
-    setEditType(type);
-    setIsModalOpen(true);
-  };
+  // const handleOpenModal = (content = {}, type) => {
+  //   setModalContent(
+  //     content && content.nameDoctor
+  //       ? content
+  //       : {
+  //           nameDoctor: { uz: "", ru: "", en: "" },
+  //           position: { uz: "", ru: "", en: "" },
+  //           options: [
+  //             {
+  //               title: { uz: "", ru: "", en: "" },
+  //               value: { uz: "", ru: "", en: "" },
+  //             },
+  //           ],
+  //           avatarImage: "",
+  //         }
+  //   );
+  //   setEditType(type);
+  //   setIsModalOpen(true);
+  // };
 
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    setModalContent({
-      nameDoctor: { uz: "", ru: "", en: "" },
-      position: { uz: "", ru: "", en: "" },
-      options: [
-        {
-          title: { uz: "", ru: "", en: "" },
-          value: { uz: "", ru: "", en: "" },
-        },
-      ],
-      avatarImage: "",
-    });
-    setEditType(null);
-  };
+  // const handleCloseModal = () => {
+  //   setIsModalOpen(false);
+  //   setModalContent({
+  //     nameDoctor: { uz: "", ru: "", en: "" },
+  //     position: { uz: "", ru: "", en: "" },
+  //     options: [
+  //       {
+  //         title: { uz: "", ru: "", en: "" },
+  //         value: { uz: "", ru: "", en: "" },
+  //       },
+  //     ],
+  //     avatarImage: "",
+  //   });
+  //   setEditType(null);
+  // };
 
-  const handleChange = (e, index, field, subField) => {
-    const { name, value } = e.target;
-    const updatedContent = { ...modalContent };
-    if (subField) {
-      updatedContent[field][index][subField][name] = value;
-    } else {
-      updatedContent[field][name] = value;
-    }
-    setModalContent(updatedContent);
-  };
+  // const handleChange = (e, index, field, subField) => {
+  //   const { name, value } = e.target;
+  //   const updatedContent = { ...modalContent };
+  //   if (subField) {
+  //     updatedContent[field][index][subField][name] = value;
+  //   } else {
+  //     updatedContent[field][name] = value;
+  //   }
+  //   setModalContent(updatedContent);
+  // };
 
-  const handleAddBlock = () => {
-    setModalContent((prevContent) => ({
-      ...prevContent,
-      options: [
-        ...prevContent.options,
-        { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
-      ],
-    }));
-  };
+  // const handleAddBlock = () => {
+  //   setModalContent((prevContent) => ({
+  //     ...prevContent,
+  //     options: [
+  //       ...prevContent.options,
+  //       { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
+  //     ],
+  //   }));
+  // };
 
-  const handleRemoveBlock = (index) => {
-    const updatedContent = {
-      ...modalContent,
-      options: modalContent.options.filter((_, i) => i !== index),
-    };
-    setModalContent(updatedContent);
-  };
+  // const handleRemoveBlock = (index) => {
+  //   const updatedContent = {
+  //     ...modalContent,
+  //     options: modalContent.options.filter((_, i) => i !== index),
+  //   };
+  //   setModalContent(updatedContent);
+  // };
 
-  const handleSave = () => {
-    const updatedItem = { ...activeItem };
-    updatedItem.reviewsList = [
-      ...updatedItem.reviewsList,
-      { ...modalContent, id: new Date().getTime() },
-    ];
-    setActiveItem(updatedItem);
-    setCreatedList((prevList) =>
-      prevList.map((item) => (item.id === activeItem.id ? updatedItem : item))
-    );
-    handleCloseModal();
-  };
+  // const handleSave = () => {
+  //   const updatedItem = { ...activeItem };
+  //   updatedItem.reviewsList = [
+  //     ...updatedItem.reviewsList,
+  //     { ...modalContent, id: new Date().getTime() },
+  //   ];
+  //   setActiveItem(updatedItem);
+  //   setCreatedList((prevList) =>
+  //     prevList.map((item) => (item.id === activeItem.id ? updatedItem : item))
+  //   );
+  //   handleCloseModal();
+  // };
 
-  const handleImageUpload = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setModalContent((prevContent) => ({
-          ...prevContent,
-          avatarImage: reader.result,
-        }));
-      };
-      reader.readAsDataURL(file);
-    }
-  };
+  // const handleImageUpload = (e) => {
+  //   const file = e.target.files[0];
+  //   if (file) {
+  //     const reader = new FileReader();
+  //     reader.onloadend = () => {
+  //       setModalContent((prevContent) => ({
+  //         ...prevContent,
+  //         avatarImage: reader.result,
+  //       }));
+  //     };
+  //     reader.readAsDataURL(file);
+  //   }
+  // };
 
-  const [showAll, setShowAll] = useState(false);
-  const visibleReviews = showAll
-    ? activeItem.reviewsList
-    : activeItem.reviewsList.slice(0, 1);
+  // const [showAll, setShowAll] = useState(false);
+  // const visibleReviews = showAll
+  //   ? activeItem.reviewsList
+  //   : activeItem.reviewsList.slice(0, 1);
 
-  const handleEditReview = (index) => {
-    const reviewToEdit = activeItem.reviewsList[index];
-    setModalContent(reviewToEdit);
-    setEditType("review");
-    setIsModalOpen(true);
-  };
+  // const handleEditReview = (index) => {
+  //   const reviewToEdit = activeItem.reviewsList[index];
+  //   setModalContent(reviewToEdit);
+  //   setEditType("review");
+  //   setIsModalOpen(true);
+  // };
 
-  const handleDeleteReview = (index) => {
-    const updatedReviews = activeItem.reviewsList.filter(
-      (_, i) => i !== index
-    );
-    const updatedItem = { ...activeItem, reviewsList: updatedReviews };
-    setActiveItem(updatedItem);
-    setCreatedList((prevList) =>
-      prevList.map((item) => (item.id === activeItem.id ? updatedItem : item))
-    );
-  };
+  // const handleDeleteReview = (index) => {
+  //   const updatedReviews = activeItem.reviewsList.filter(
+  //     (_, i) => i !== index
+  //   );
+  //   const updatedItem = { ...activeItem, reviewsList: updatedReviews };
+  //   setActiveItem(updatedItem);
+  //   setCreatedList((prevList) =>
+  //     prevList.map((item) => (item.id === activeItem.id ? updatedItem : item))
+  //   );
+  // };
 
   return (
     <div className="w-full">
-      <h2 className="uppercase text-[25px] font-semibold mdx:text-[25px] mb-4">
+      {/* <h2 className="uppercase text-[25px] font-semibold mdx:text-[25px] mb-4">
         Рецензии от врачей
       </h2>
       {visibleReviews.map((review, index) => (
@@ -333,7 +333,7 @@ export default function Reviews({
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </div>
   );
 }

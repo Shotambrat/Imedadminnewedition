@@ -27,10 +27,14 @@ export default function ProductPreview({
     }));
   }, [setActiveItem]);
 
-  const finalPrice =
-    activeItem.sale && activeItem.discount > 0
-      ? Math.round(activeItem.originalPrice * (1 - activeItem.discount / 100))
-      : activeItem.originalPrice;
+  let finalPrice = 0;
+
+  if (activeItem && activeItem.sale) {
+    finalPrice =
+      activeItem.sale && activeItem.discount > 0
+        ? Math.round(activeItem.originalPrice * (1 - activeItem.discount / 100))
+        : activeItem.originalPrice;
+  }
 
   return (
     <div className="w-full flex flex-col lg:flex-row gap-6">
@@ -82,7 +86,7 @@ export default function ProductPreview({
             )}
           </div>
           <Image
-            src="/path/to/logo.png"
+            src={''}
             width={100}
             height={50}
             alt="Brand Logo"
