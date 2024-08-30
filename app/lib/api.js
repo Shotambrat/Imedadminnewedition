@@ -1,14 +1,5 @@
 import axios from 'axios'
 
-export const fetchCatalog = async () => {
-	try {
-		const response = await axios.get('/api/catalog')
-		return response.data
-	} catch (error) {
-		throw new Error('Failed::: fetchCatalog')
-	}
-}
-
 // GET ALL PRODUCTS
 export const getAllProducts = async () => {
 	try {
