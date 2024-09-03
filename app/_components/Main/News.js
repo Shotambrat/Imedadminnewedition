@@ -38,14 +38,12 @@ export default function News() {
       <div className="w-full grid gap-4 grid-cols-1 mdl:grid-cols-2 xl:grid-cols-4 h-auto">
         {data.map((item, i) => {
           return (
-            <Link key={i} href={`/news/${item.slug}`}>
               <NewCard
                 key={i}
                 title={item.title}
                 date={item.date}
                 imageSrc={item.imageSrc}
               />
-            </Link>
           );
         })}
       </div>

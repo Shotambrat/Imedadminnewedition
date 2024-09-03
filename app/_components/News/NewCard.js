@@ -20,7 +20,6 @@ export default function NewCard({ key, id, title, date, imageSrc, slug }) {
   };
   return (
     <div className="w-full border border-neutral-300 bg-white h-full flex flex-col gap-5 justify-between relative group">
-      <Link href={`/news/${slug}`}>
       <Image
         src={imageSrc}
         width={500}
@@ -54,8 +53,6 @@ export default function NewCard({ key, id, title, date, imageSrc, slug }) {
           Delete
         </button>
       </div>
-      
-      </Link>
       {showDeleteModal && (
         <DeleteConfirmationModal
           productId={id}
