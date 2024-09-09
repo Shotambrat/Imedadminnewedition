@@ -14,6 +14,8 @@ export default function ProductPreviewEditModal({
   const [categories, setCategories] = useState([]);
   const [catalogs, setCatalogs] = useState([]);
 
+  console.log(languages, activeLang)
+
   const {
     register,
     handleSubmit,
@@ -99,8 +101,8 @@ export default function ProductPreviewEditModal({
     setActiveItem((prevItem) => ({
       ...prevItem,
       [field]: {
-        ...prevItem[field],
-        [lang]: value,
+        ...prevItem[field], // сохраняем данные для всех языков
+        [lang]: value, // обновляем данные для конкретного языка
       },
     }));
   };

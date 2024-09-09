@@ -4,8 +4,6 @@ import axios from "axios";
 import { DNA } from "react-loader-spinner";
 import ProductPreview from "./ProductPreview";
 import ProductCharacteristics from "./ProductCharacteristics";
-import Reviews from "./Reviews";
-import VideoReview from "./VideoReview";
 
 export default function ProductInfo({ slug, onClose }) {
   const [activeLang, setActiveLang] = useState("uz");
@@ -17,13 +15,12 @@ export default function ProductInfo({ slug, onClose }) {
   useEffect(() => {
     setLoading(true);
     axios
-      .get(`http://213.230.91.55:8130/v1/product/${slug}`,{
+      .get(`http://213.230.91.55:8130/v1/product/${slug}`, {
         headers: {
           "Accept-Language": "",
         },
       })
       .then((response) => {
-        console.log(response)
         setActiveItem(response.data.data);
         setLoading(false);
       })
@@ -33,7 +30,7 @@ export default function ProductInfo({ slug, onClose }) {
       });
   }, []);
 
-  console.log("ACTIVE ITEM", activeItem, slug);
+  console.log("ACTIVE ITEM", activeItem);
 
   const handleLangChange = useCallback((lang) => {
     setActiveLang(lang);
@@ -55,8 +52,79 @@ export default function ProductInfo({ slug, onClose }) {
     );
   }, [activeItem]);
 
+  const handleSave = async () => {
+    setLoading(true);
+    const authFormData = new FormData();
+    authFormData.append("username", "nasiniemsin");
+    authFormData.append("password", "2x2=xx");
+  
+    const authResponse = await axios.post(
+      "http://213.230.91.55:8130/v1/auth/login",
+      authFormData
+    );
+  
+    const token = authResponse.data.data.token;
+  
+    // Убедитесь, что мы не дублируем descriptions и characteristics
+    const { gallery, slug, reviews, catalog, category, brand, clients, descriptions, characteristics, ...items } = activeItem;
+    
+    try {
+      const updatedGallery = await Promise.all(
+        gallery.map(async (photo) => {
+          if (photo.url instanceof File) {
+            const formData = new FormData();
+            formData.append("photo", photo.url);
+  
+            const response = await axios.post(
+              "https://imed.uz/api/photo",
+              formData,
+              {
+                headers: {
+                  Authorization: `Bearer ${token}`,
+                  "Content-Type": "multipart/form-data",
+                },
+              }
+            );
+            return { url: response.data.data[0].url };
+          } else if (photo.url == null) {
+            await axios.delete(`https://imed.uz/api/photo/${photo.id}`, {
+              headers: {
+                Authorization: `Bearer ${token}`,
+              },
+            });
+            return null;
+          } else {
+            return photo;
+          }
+        })
+      );
+  
+      const updatedClients = clients.map(client => ({ id: client.id }));
+  
+      const updatedData = {
+        ...items,
+        gallery: updatedGallery.filter(Boolean), // Убираем пустые значения
+        descriptions, // descriptions не дублируется
+        characteristics, // characteristics не дублируется
+        brand: { id: brand.id },
+        clients: updatedClients,
+      };
+  
+      await axios.put(`https://imed.uz/api/v1/product`, updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
+      setLoading(false);
+      onClose();
+    } catch (error) {
+      console.log("Error while creating photos", error);
+    }
+  };
+
   if (activeItem == null) {
-    return <div>Loading ....</div>
+    return <div>Loading ....</div>;
   }
 
   return (
@@ -76,29 +144,33 @@ export default function ProductInfo({ slug, onClose }) {
         ))}
       </div>
       <ProductPreview
+        setActiveLang={setActiveLang}
         activeItem={activeItem}
         setActiveItem={setActiveItem}
         languages={languages}
         activeLang={activeLang}
       />
       <ProductCharacteristics
+        setActiveLang={setActiveLang}
         activeItem={activeItem}
         setActiveItem={setActiveItem}
         languages={languages}
         activeLang={activeLang}
       />
-      {/* <VideoReview
-        activeItem={activeItem}
-        setActiveItem={setActiveItem}
-        languages={languages}
-        activeLang={activeLang}
-      />
-      <Reviews
-        activeItem={activeItem}
-        setActiveItem={setActiveItem}
-        languages={languages}
-        activeLang={activeLang}
-      /> */}
+      <div className="flex items-start w-full gap-4">
+        <button
+          onClick={handleSave}
+          className="py-3 px-8 text-white bg-blue-400 rounded-xl"
+        >
+          Сохранить
+        </button>
+        <button
+          onClick={onClose}
+          className="py-3 px-8 text-white bg-red-700 rounded-xl"
+        >
+          Отмена
+        </button>
+      </div>
     </div>
   );
 }

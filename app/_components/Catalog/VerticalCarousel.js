@@ -4,12 +4,12 @@ import "react-image-gallery/styles/css/image-gallery.css";
 
 const VerticalCarousel = ({ images, onGalleryUpdate }) => {
   const galleryItems = images.map((src, index) => ({
-    original: src instanceof File ? URL.createObjectURL(src) : src.url,
-    thumbnail: src instanceof File ? URL.createObjectURL(src) : src.url,
+    original: src.url instanceof File ? URL.createObjectURL(src.url) : src.url,
+    thumbnail: src.url instanceof File ? URL.createObjectURL(src.url) : src.url,
     thumbnailLabel: (
       <button
         className="delete-button"
-        onClick={(e) => handleDeleteImage(e, index)}
+        onClick={(e) => handleDeleteImage(e, src.id)}
       >
         &times;
       </button>
@@ -18,13 +18,23 @@ const VerticalCarousel = ({ images, onGalleryUpdate }) => {
 
   const handleImageUpload = (e) => {
     const files = Array.from(e.target.files);
-    const newImages = files.map(file => file);
+    const newImages = files.map((file, index) => {
+      return {
+        id: index,
+        url: file
+      }
+    });
     onGalleryUpdate([...images, ...newImages]);
   };
 
   const handleDeleteImage = (e, index) => {
     e.stopPropagation(); // Чтобы избежать переключения изображения
-    const updatedImages = images.filter((_, i) => i !== index);
+    const updatedImages = images.map(i => {
+      if (i.id === index) {
+        return {id: i.id, url: null};
+      }
+      return i;
+    });
     onGalleryUpdate(updatedImages);
   };
 

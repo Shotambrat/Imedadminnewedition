@@ -17,6 +17,7 @@ export default function ProductCharacteristics({
   const [selectedClients, setSelectedClients] = useState([]);
   const [modal, setModal] = useState(false);
 
+  // Fetch clients for the client section
   useEffect(() => {
     const fetchClients = async () => {
       try {
@@ -34,28 +35,35 @@ export default function ProductCharacteristics({
 
   const data = [
     {
-      category: "description",
+      category: "descriptions",
       title: "Описание",
       desc: true,
-      data: activeItem.descriptions,
+      data: activeItem?.descriptions || [],
     },
     {
       category: "characteristics",
       title: "Характеристики",
       desc: false,
-      data: activeItem.characteristics,
+      data: activeItem?.characteristics || [],
     },
     {
       category: "client",
       title: "Клиент",
       desc: false,
-      data: activeItem.clients,
+      data: activeItem?.clients || [],
+    },
+    {
+      category: "files",
+      title: "Файлы",
+      desc: false,
+      data: activeItem?.files || [],
     },
   ];
 
   const [active, setActive] = useState(data[0].category);
   const [filtered, setFiltered] = useState(data[0]);
 
+  // Function to handle modal opening and content setup
   const handleOpenModal = (content = [], type) => {
     if (type === "clients") {
       setSelectedClients(activeItem.clients.map((client) => client.id));
@@ -76,70 +84,37 @@ export default function ProductCharacteristics({
     setEditType(null);
   };
 
+  // Function to handle changes in text inputs (title and value)
   const handleChange = (e, index, field) => {
     const { name, value } = e.target;
-    setActiveItem((prevItem) => {
-      // Ensure prevItem[editType] is an array
-      if (!Array.isArray(prevItem[editType])) {
-        return prevItem; // Exit early if it's not an array
-      }
-  
-      const updatedContent = [...prevItem[editType]];
+    setModalContent((prevContent) => {
+      const updatedContent = [...prevContent];
       updatedContent[index][field][name] = value;
-  
-      return {
-        ...prevItem,
-        [editType]: updatedContent,
-      };
+      return updatedContent;
     });
   };
-  
+
+  // Function to add new block for editing
   const handleAddBlock = () => {
-    setActiveItem((prevItem) => {
-      // Ensure prevItem[editType] is an array
-      if (!Array.isArray(prevItem[editType])) {
-        return prevItem; // Exit early if it's not an array
-      }
-  
-      const updatedContent = [
-        ...prevItem[editType],
-        { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
-      ];
-  
-      return {
-        ...prevItem,
-        [editType]: updatedContent,
-      };
-    });
+    setModalContent((prevContent) => [
+      ...prevContent,
+      { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
+    ]);
   };
-  
+
+  // Function to remove block by index
   const handleRemoveBlock = (index) => {
-    setActiveItem((prevItem) => {
-      // Ensure prevItem[editType] is an array
-      if (!Array.isArray(prevItem[editType])) {
-        return prevItem; // Exit early if it's not an array
-      }
-  
-      const updatedContent = prevItem[editType].filter((_, i) => i !== index);
-  
-      return {
-        ...prevItem,
-        [editType]: updatedContent,
-      };
-    });
+    setModalContent((prevContent) => prevContent.filter((_, i) => i !== index));
   };
 
+  // Save the changes to activeItem
   const handleSave = () => {
-    if (editType === "clients") {
-      setActiveItem((prevItem) => ({
-        ...prevItem,
-        clients: clients.filter((client) =>
-          selectedClients.includes(client.id)
-        ),
-      }));
-    }
-
-    handleCloseModal();
+    // Обновляем состояние activeItem с новыми значениями из modalContent
+    setActiveItem((prevItem) => ({
+      ...prevItem,
+      [editType]: modalContent, // Обновляем описания или характеристики
+    }));
+    handleCloseModal(); // Закрываем модальное окно
   };
 
   const handleCheckboxChange = (clientId) => {
@@ -153,22 +128,28 @@ export default function ProductCharacteristics({
   useEffect(() => {
     const updatedData = [
       {
-        category: "description",
+        category: "descriptions",
         title: "Описание",
         desc: true,
-        data: activeItem.descriptions,
+        data: activeItem?.descriptions || [],
       },
       {
         category: "characteristics",
         title: "Характеристики",
         desc: false,
-        data: activeItem.characteristics,
+        data: activeItem?.characteristics || [],
       },
       {
         category: "client",
         title: "Клиент",
         desc: false,
-        data: activeItem.clients,
+        data: activeItem?.clients || [],
+      },
+      {
+        category: "files",
+        title: "Файлы",
+        desc: false,
+        data: activeItem?.files || [],
       },
     ];
 
@@ -179,7 +160,7 @@ export default function ProductCharacteristics({
     <div className="w-full flex flex-col gap-5">
       <div className="w-full flex flex-col relative">
         <div className="w-full overflow-x-scroll flex gap-8 lg:gap-12 scrollbar-hide touch-auto">
-          {data.slice(0, 3).map((item, index) => (
+          {data.slice(0, 4).map((item, index) => (
             <button
               onClick={() => {
                 setActive(item.category);
@@ -198,6 +179,7 @@ export default function ProductCharacteristics({
         </div>
         <hr className="w-full border-t-2 absolute bottom-0 border-slate-300" />
       </div>
+
       <div>
         {filtered.desc ? (
           <div className="flex flex-col gap-4">
@@ -246,6 +228,23 @@ export default function ProductCharacteristics({
                 ))}
               </div>
             )}
+
+            {filtered.category === "files" && (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {filtered.data.map((file, index) => (
+                  <div key={index} className="border p-4 flex items-center">
+                    <Image
+                      src={file.url}
+                      alt={`File ${index}`}
+                      width={50}
+                      height={50}
+                      className="ml-4"
+                    />
+                    <span className="ml-4">Файл {index + 1}</span>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>
@@ -254,7 +253,7 @@ export default function ProductCharacteristics({
         <button
           className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
           onClick={() =>
-            handleOpenModal(activeItem.descriptions, "description")
+            handleOpenModal(activeItem?.descriptions || [], "descriptions")
           }
         >
           Редактировать Описание
@@ -262,7 +261,7 @@ export default function ProductCharacteristics({
         <button
           className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
           onClick={() =>
-            handleOpenModal(activeItem.characteristics, "characteristics")
+            handleOpenModal(activeItem?.characteristics || [], "characteristics")
           }
         >
           Редактировать Характеристики
@@ -272,6 +271,12 @@ export default function ProductCharacteristics({
           onClick={() => handleOpenModal(null, "clients")}
         >
           Редактировать Клиенты
+        </button>
+        <button
+          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
+          onClick={() => handleOpenModal(activeItem?.files || [], "files")}
+        >
+          Редактировать Файлы
         </button>
       </div>
 
@@ -294,12 +299,15 @@ export default function ProductCharacteristics({
               ))}
             </div>
             <h2 className="text-2xl mb-4">
-              {editType === "description"
+              {editType === "descriptions"
                 ? "Описание товара"
                 : editType === "characteristics"
                 ? "Характеристики товара"
-                : "Клиент"}
+                : editType === "files"
+                ? "Файлы"
+                : "Клиенты"}
             </h2>
+
             {editType === "clients" ? (
               <div>
                 {clients.map((client) => (
@@ -355,6 +363,7 @@ export default function ProductCharacteristics({
                 </div>
               ))
             )}
+
             <div className="flex justify-end gap-4">
               <button
                 onClick={handleAddBlock}
