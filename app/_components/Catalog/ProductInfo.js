@@ -67,7 +67,7 @@ export default function ProductInfo({ slug, onClose }) {
   
     // Убедитесь, что мы не дублируем descriptions и characteristics
     const { gallery, slug, reviews, catalog, category, brand, clients, descriptions, characteristics, ...items } = activeItem;
-    
+
     try {
       const updatedGallery = await Promise.all(
         gallery.map(async (photo) => {
@@ -98,17 +98,29 @@ export default function ProductInfo({ slug, onClose }) {
           }
         })
       );
+
+      console.log(descriptions)
+
+      const updatedDescriptions = descriptions.map((description) => (
+        description.createId ? description.createId && description.title !== null ? {title: description.title, value: description.value } : null : description.id && description.title !== null ? description : {id: description.id}
+      )).filter(( item ) => item !== null);
+
+      const updatedChracteristics = characteristics.map((description) => (
+        description.createId ? description.createId && description.title !== null ? {title: description.title, value: description.value } : null : description.id && description.title !== null ? description : {id: description.id}
+      )).filter(( item ) => item !== null);
   
       const updatedClients = clients.map(client => ({ id: client.id }));
   
       const updatedData = {
         ...items,
-        gallery: updatedGallery.filter(Boolean), // Убираем пустые значения
-        descriptions, // descriptions не дублируется
-        characteristics, // characteristics не дублируется
+        gallery: updatedGallery.filter(Boolean),
+        descriptions: updatedDescriptions,
+        characteristics: updatedChracteristics,
         brand: { id: brand.id },
         clients: updatedClients,
       };
+
+      console.log("UpdatedData",updatedData)
   
       await axios.put(`https://imed.uz/api/v1/product`, updatedData, {
         headers: {

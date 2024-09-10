@@ -8,7 +8,7 @@
   import DeleteConfirmationModal from "./DeleteConfirmationModal";
   import EditProductModal from "./EditProductModal";
 
-  export default function  Catalogitem({
+  export default function Catalogitem({
     new: isNew,
     sale,
     image,
@@ -17,6 +17,7 @@
     price,
     slug,
     discount,
+    productId
   }) {
     const [isFavorite, setIsFavorite] = useState(false);
     const [isMdx, setIsMdx] = useState(false);
@@ -135,7 +136,7 @@
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                setShowDeleteModal(true);
+                setShowDeleteModal(productId);
               }}
             >
               Delete
@@ -144,7 +145,7 @@
           {showDeleteModal && (
             <DeleteConfirmationModal
               onClose={() => setShowDeleteModal(false)}
-              slug={editModalSlug}
+              productId={showDeleteModal}
             />
           )}
           {editModalSlug === slug && (

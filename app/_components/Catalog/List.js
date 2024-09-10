@@ -126,6 +126,7 @@ const List = ({ data, allCotegories, productWithCatalogID, productWithCategoryId
                     price={item.originalPrice}
                     slug={item.slug}
                     discount={item.discount}
+                    productId={item.id}
                   />
                 </div>
               ))

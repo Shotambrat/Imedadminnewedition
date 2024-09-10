@@ -1,5 +1,5 @@
 import Modal from "./AttachedFiles";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import axios from "axios";
 
@@ -17,23 +17,8 @@ export default function ProductCharacteristics({
   const [selectedClients, setSelectedClients] = useState([]);
   const [modal, setModal] = useState(false);
 
-  // Fetch clients for the client section
-  useEffect(() => {
-    const fetchClients = async () => {
-      try {
-        const response = await axios.get("https://imed.uz/api/v1/client/all");
-        setClients(response.data.data);
-      } catch (error) {
-        console.error("Error fetching clients:", error);
-      }
-    };
-    fetchClients();
-  }, []);
-
-  const openModal = () => setModal(true);
-  const closeModal = () => setModal(false);
-
-  const data = [
+  // Централизованная структура данных для категорий
+  const categoriesData = useCallback(() => [
     {
       category: "descriptions",
       title: "Описание",
@@ -48,7 +33,7 @@ export default function ProductCharacteristics({
     },
     {
       category: "client",
-      title: "Клиент",
+      title: "Клиенты",
       desc: false,
       data: activeItem?.clients || [],
     },
@@ -58,24 +43,45 @@ export default function ProductCharacteristics({
       desc: false,
       data: activeItem?.files || [],
     },
-  ];
+  ], [activeItem]);
 
-  const [active, setActive] = useState(data[0].category);
-  const [filtered, setFiltered] = useState(data[0]);
+  const [active, setActive] = useState("descriptions");
+  const [filtered, setFiltered] = useState(categoriesData()[0]);
 
-  // Function to handle modal opening and content setup
+  useEffect(() => {
+    // Fetch clients for the client section
+    const fetchClients = async () => {
+      try {
+        const response = await axios.get("https://imed.uz/api/v1/client/all");
+        setClients(response.data.data);
+      } catch (error) {
+        console.error("Error fetching clients:", error);
+      }
+    };
+    fetchClients();
+  }, []);
+
+  useEffect(() => {
+    // Обновляем отфильтрованные данные при изменении activeItem или active
+    const data = categoriesData();
+    setFiltered(data.find((item) => item.category === active));
+  }, [activeItem, active, categoriesData]);
+
   const handleOpenModal = (content = [], type) => {
+    setEditType(type);
+    setIsModalOpen(true);
+
     if (type === "clients") {
       setSelectedClients(activeItem.clients.map((client) => client.id));
     } else {
+      // Подготовка содержимого для модального окна
       const initializedContent = content.map((block) => ({
+        id: block.id || null,
         title: { uz: "", ru: "", en: "", ...block.title },
         value: { uz: "", ru: "", en: "", ...block.value },
       }));
       setModalContent(initializedContent);
     }
-    setEditType(type);
-    setIsModalOpen(true);
   };
 
   const handleCloseModal = () => {
@@ -84,89 +90,69 @@ export default function ProductCharacteristics({
     setEditType(null);
   };
 
-  // Function to handle changes in text inputs (title and value)
-  const handleChange = (e, index, field) => {
-    const { name, value } = e.target;
-    setModalContent((prevContent) => {
-      const updatedContent = [...prevContent];
-      updatedContent[index][field][name] = value;
-      return updatedContent;
-    });
+  const handleSaveModal = () => {
+    // Обновляем activeItem на основе содержимого модального окна
+    if (editType) {
+      const updatedItem = { ...activeItem, [editType]: modalContent };
+      setActiveItem(updatedItem);
+    }
+    handleCloseModal();
   };
 
-  // Function to add new block for editing
   const handleAddBlock = () => {
-    setModalContent((prevContent) => [
-      ...prevContent,
-      { title: { uz: "", ru: "", en: "" }, value: { uz: "", ru: "", en: "" } },
+    // Добавляем новый пустой блок для редактирования (без id)
+    setModalContent((prev) => [
+      ...prev,
+      {
+        createId: new Date().getTime(), // Создаем временный уникальный ID для новых блоков
+        title: { uz: "", ru: "", en: "" },
+        value: { uz: "", ru: "", en: "" },
+      },
     ]);
   };
 
-  // Function to remove block by index
-  const handleRemoveBlock = (index) => {
-    setModalContent((prevContent) => prevContent.filter((_, i) => i !== index));
-  };
-
-  // Save the changes to activeItem
-  const handleSave = () => {
-    // Обновляем состояние activeItem с новыми значениями из modalContent
-    setActiveItem((prevItem) => ({
-      ...prevItem,
-      [editType]: modalContent, // Обновляем описания или характеристики
-    }));
-    handleCloseModal(); // Закрываем модальное окно
-  };
-
-  const handleCheckboxChange = (clientId) => {
-    setSelectedClients((prevSelected) =>
-      prevSelected.includes(clientId)
-        ? prevSelected.filter((id) => id !== clientId)
-        : [...prevSelected, clientId]
+  const handleRemoveBlock = (id) => {
+    // Удаляем блок по createId или id
+    setModalContent((prev) =>
+      prev.map((block) =>
+        block.createId === id || block.id === id
+          ? { ...block, title: null, value: null } // Очищаем блок, но сохраняем id
+          : block
+      )
     );
   };
 
-  useEffect(() => {
-    const updatedData = [
-      {
-        category: "descriptions",
-        title: "Описание",
-        desc: true,
-        data: activeItem?.descriptions || [],
-      },
-      {
-        category: "characteristics",
-        title: "Характеристики",
-        desc: false,
-        data: activeItem?.characteristics || [],
-      },
-      {
-        category: "client",
-        title: "Клиент",
-        desc: false,
-        data: activeItem?.clients || [],
-      },
-      {
-        category: "files",
-        title: "Файлы",
-        desc: false,
-        data: activeItem?.files || [],
-      },
-    ];
+  const handleChange = (e, id, field) => {
+    const { name, value } = e.target;
+    setModalContent((prev) =>
+      prev.map((block) =>
+        block.createId === id || block.id === id
+          ? {
+              ...block,
+              [field]: { ...block[field], [name]: value }, // Обновляем конкретное поле
+            }
+          : block
+      )
+    );
+  };
 
-    setFiltered(updatedData.find((item) => item.category === active));
-  }, [activeItem, activeLang, active]);
+  const handleCheckboxChange = (clientId) => {
+    // Обновляем выбранных клиентов
+    setSelectedClients((prev) =>
+      prev.includes(clientId)
+        ? prev.filter((id) => id !== clientId)
+        : [...prev, clientId]
+    );
+  };
 
   return (
     <div className="w-full flex flex-col gap-5">
       <div className="w-full flex flex-col relative">
-        <div className="w-full overflow-x-scroll flex gap-8 lg:gap-12 scrollbar-hide touch-auto">
-          {data.slice(0, 4).map((item, index) => (
+        <div className="w-full overflow-x-scroll flex gap-8 lg:gap-12 scrollbar-hide">
+          {categoriesData().map((item, index) => (
             <button
-              onClick={() => {
-                setActive(item.category);
-                setFiltered(item);
-              }}
               key={index}
+              onClick={() => setActive(item.category)}
               className={`z-10 w-auto text-lg transition-text font-medium ${
                 active === item.category
                   ? "text-[#E31E24] border-b-2 border-b-[#E31E24]"
@@ -180,26 +166,29 @@ export default function ProductCharacteristics({
         <hr className="w-full border-t-2 absolute bottom-0 border-slate-300" />
       </div>
 
+      {/* Display filtered data */}
       <div>
         {filtered.desc ? (
           <div className="flex flex-col gap-4">
-            {filtered.data.map((block, index) => (
-              <div key={index} className="flex flex-col gap-2">
-                <h3 className="font-bold text-lg">{block.title[activeLang]}</h3>
-                <p className="text-neutral-500">{block.value[activeLang]}</p>
-              </div>
-            ))}
+            {filtered.data
+              .filter((block) => block.title !== null)
+              .map((block, index) => (
+                <div key={index} className="flex flex-col gap-2">
+                  <h3 className="font-bold text-lg">{block.title[activeLang]}</h3>
+                  <p className="text-neutral-500">{block.value[activeLang]}</p>
+                </div>
+              ))}
           </div>
         ) : (
           <div className="flex flex-col gap-6 w-full">
             {filtered.category === "characteristics" &&
-              filtered.data.map((item, i) => (
+              filtered.data.filter((block) => block.title !== null).map((item, i) => (
                 <div key={i} className="w-full flex gap-3">
-                  <p className="w-full text-neutral-400 max-w-[100px] md:max-w-[150px] mdx:max-w-[200px] lg:max-w-[400px]">
-                    {item.title[activeLang] || ""}
+                  <p className="w-full text-neutral-400 max-w-[200px]">
+                    {item.title[activeLang]}
                   </p>
                   <div className="flex w-full flex-col">
-                    {item.value[activeLang].split("\n").map((line, j) => (
+                    {item.value[activeLang]?.split("\n").map((line, j) => (
                       <p key={j}>{line}</p>
                     ))}
                   </div>
@@ -209,19 +198,16 @@ export default function ProductCharacteristics({
             {filtered.category === "client" && (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 {filtered.data.map((client, index) => (
-                  <div key={index} className="border p-4 ">
-                    <div className="flex-col items-center mdx:flex-row flex gap-6">
+                  <div key={index} className="border p-4">
+                    <div className="flex-col mdx:flex-row flex gap-6">
                       <Image
                         src={client.logo?.url}
                         alt={client.name}
                         width={50}
                         height={50}
-                        className="ml-4"
                       />
                       <div className="mt-2 flex gap-4 flex-col">
-                        <h3 className="font-bold text-lg mdx:text-2xl mdx:mb-2">
-                          {client.name}
-                        </h3>
+                        <h3 className="font-bold text-lg">{client.name}</h3>
                       </div>
                     </div>
                   </div>
@@ -238,7 +224,6 @@ export default function ProductCharacteristics({
                       alt={`File ${index}`}
                       width={50}
                       height={50}
-                      className="ml-4"
                     />
                     <span className="ml-4">Файл {index + 1}</span>
                   </div>
@@ -251,35 +236,34 @@ export default function ProductCharacteristics({
 
       <div className="flex justify-start gap-4 mt-2">
         <button
-          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
-          onClick={() =>
-            handleOpenModal(activeItem?.descriptions || [], "descriptions")
-          }
+          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold"
+          onClick={() => handleOpenModal(activeItem?.descriptions, "descriptions")}
         >
           Редактировать Описание
         </button>
         <button
-          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
+          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold"
           onClick={() =>
-            handleOpenModal(activeItem?.characteristics || [], "characteristics")
+            handleOpenModal(activeItem?.characteristics, "characteristics")
           }
         >
           Редактировать Характеристики
         </button>
         <button
-          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
-          onClick={() => handleOpenModal(null, "clients")}
+          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold"
+          onClick={() => handleOpenModal(activeItem?.clients, "clients")}
         >
           Редактировать Клиенты
         </button>
         <button
-          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
-          onClick={() => handleOpenModal(activeItem?.files || [], "files")}
+          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold"
+          onClick={() => handleOpenModal(activeItem?.files, "files")}
         >
           Редактировать Файлы
         </button>
       </div>
 
+      {/* Modal for editing content */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white p-8 rounded-lg w-full max-w-lg h-[90%] overflow-y-scroll">
@@ -289,79 +273,77 @@ export default function ProductCharacteristics({
                   key={lang}
                   onClick={() => setActiveLang(lang)}
                   className={`px-4 py-2 text-sm font-semibold ${
-                    activeLang === lang
-                      ? "bg-redMain text-white"
-                      : "bg-white text-black"
-                  } border rounded`}
+                    activeLang === lang ? "bg-redMain text-white" : "bg-white text-black"
+                  }`}
                 >
                   {lang.toUpperCase()}
                 </button>
               ))}
             </div>
+
             <h2 className="text-2xl mb-4">
               {editType === "descriptions"
-                ? "Описание товара"
+                ? "Редактировать Описание"
                 : editType === "characteristics"
-                ? "Характеристики товара"
+                ? "Редактировать Характеристики"
                 : editType === "files"
-                ? "Файлы"
-                : "Клиенты"}
+                ? "Редактировать Файлы"
+                : "Редактировать Клиенты"}
             </h2>
 
+            {/* Modal Content */}
             {editType === "clients" ? (
-              <div>
-                {clients.map((client) => (
-                  <div key={client.id} className="flex items-center mb-4">
-                    <input
-                      type="checkbox"
-                      checked={selectedClients.includes(client.id)}
-                      onChange={() => handleCheckboxChange(client.id)}
-                    />
-                    <Image
-                      src={client.logo?.url}
-                      alt={client.name}
-                      width={50}
-                      height={50}
-                      className="ml-4"
-                    />
-                    <span className="ml-4">{client.name}</span>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              modalContent.map((block, index) => (
-                <div key={index} className="mb-6 border-b pb-4">
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">
-                      Заголовок ({activeLang})
-                    </label>
-                    <input
-                      type="text"
-                      name={activeLang}
-                      value={block.title[activeLang] || ""}
-                      onChange={(e) => handleChange(e, index, "title")}
-                      className="w-full p-2 border border-gray-300 rounded"
-                    />
-                  </div>
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium mb-2">
-                      Описание ({activeLang})
-                    </label>
-                    <textarea
-                      name={activeLang}
-                      value={block.value[activeLang] || ""}
-                      onChange={(e) => handleChange(e, index, "value")}
-                      className="w-full p-2 border border-gray-300 rounded"
-                    />
-                  </div>
-                  <button
-                    onClick={() => handleRemoveBlock(index)}
-                    className="py-2 px-4 bg-red-500 text-white rounded"
-                  >
-                    Удалить блок
-                  </button>
+              clients.map((client) => (
+                <div key={client.id} className="flex items-center mb-4">
+                  <input
+                    type="checkbox"
+                    checked={selectedClients.includes(client.id)}
+                    onChange={() => handleCheckboxChange(client.id)}
+                  />
+                  <Image src={client.logo?.url} alt={client.name} width={50} height={50} />
+                  <span className="ml-4">{client.name}</span>
                 </div>
               ))
+            ) : (
+              modalContent
+                .filter((block) => block.title !== null)
+                .map((block, index) => (
+                  <div key={index} className="mb-6 border-b pb-4">
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium mb-2">
+                        Заголовок ({activeLang})
+                      </label>
+                      <input
+                        type="text"
+                        name={activeLang}
+                        value={block.title[activeLang] || ""}
+                        onChange={(e) =>
+                          handleChange(e, block.createId ? block.createId : block.id, "title")
+                        }
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    <div className="mb-4">
+                      <label className="block text-sm font-medium mb-2">
+                        Описание ({activeLang})
+                      </label>
+                      <textarea
+                        name={activeLang}
+                        value={block.value[activeLang] || ""}
+                        onChange={(e) =>
+                          handleChange(e, block.createId ? block.createId : block.id, "value")
+                        }
+                        className="w-full p-2 border border-gray-300 rounded"
+                      />
+                    </div>
+                    <button
+                      onClick={() => handleRemoveBlock(block.id || block.createId)}
+                      className="py-2 px-4 bg-red-500 text-white rounded"
+                    >
+                      Удалить блок
+                    </button>
+                  </div>
+                ))
             )}
 
             <div className="flex justify-end gap-4">
@@ -372,7 +354,7 @@ export default function ProductCharacteristics({
                 Добавить блок
               </button>
               <button
-                onClick={handleSave}
+                onClick={handleSaveModal}
                 className="py-2 px-4 bg-blue-500 text-white rounded"
               >
                 Сохранить
@@ -386,22 +368,6 @@ export default function ProductCharacteristics({
             </div>
           </div>
         </div>
-      )}
-
-      <div className="flex justify-start mt-2">
-        <button
-          className="bg-[#FCE8E9] text-[#E31E24] py-4 px-[30px] font-bold hover:text-[#EE787C]"
-          onClick={openModal}
-        >
-          Прикрепить файлы
-        </button>
-      </div>
-      {modal && (
-        <Modal
-          activeItem={activeItem}
-          setActiveItem={setActiveItem}
-          closeModal={closeModal}
-        />
       )}
     </div>
   );
