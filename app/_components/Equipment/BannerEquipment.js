@@ -111,7 +111,8 @@ export default function BannerCarousel() {
                                         onClick={handleOpenEditModal}
                                         className="bg-yellow-500 text-white px-4 py-2 rounded"
                                     >
-                                        Edit Banner
+                                        Edit Banner/
+                                        Delete
                                     </button>
                                 </div>
                             </div>

@@ -37,10 +37,11 @@ export default function SliderModal({ onClose }) {
                 en: item.name.en || "",
               },
               photo: item.photo?.url || "",
+              photoId: item.photo?.id || null, // Store the photo id for updating
             };
           })
         );
-        
+
       } catch (error) {
         console.error("Error fetching slides:", error);
       }
@@ -50,55 +51,76 @@ export default function SliderModal({ onClose }) {
   }, []);
 
   const addSlide = () => {
-    setSlides([...slides, { id: null, name: { uz: "", ru: "", en: "" }, photo: "" }]);
+    setSlides([...slides, { id: null, name: { uz: "", ru: "", en: "" }, photo: "", photoId: null }]);
   };
 
-  // This function will update the name for the currently selected language
   const handleChange = (index, key, value) => {
     const newSlides = [...slides];
     newSlides[index].name = {
-      ...newSlides[index].name, // Сохраняем другие языковые данные
-      [language]: value, // Обновляем только выбранный язык
+      ...newSlides[index].name,
+      [language]: value,
     };
     setSlides(newSlides);
   };
 
-  const removeSlide = (index) => {
-    const slideToRemove = slides[index];
-    if (slideToRemove.id) {
-      setDeletedSlides([...deletedSlides, slideToRemove]);
+  const handleFileChange = (index, file) => {
+    const newSlides = [...slides];
+
+    if (file instanceof File) {
+      const photoUrl = URL.createObjectURL(file);
+      newSlides[index].photo = photoUrl;  // Set the image preview
+      newSlides[index].file = file;       // Store the actual file for the update request
+    } else {
+      console.error('Invalid file type. Expected a File instance.');
     }
-    const newSlides = slides.filter((_, i) => i !== index);
+
     setSlides(newSlides);
+  };
+
+
+  const updatePhoto = async (slide) => {
+    const authFormData = new FormData();
+    authFormData.append("username", "nasiniemsin");
+    authFormData.append("password", "2x2=xx");
+
+    try {
+      const authResponse = await axios.post("http://213.230.91.55:8130/v1/auth/login", authFormData);
+      const token = authResponse.data.data.token;
+
+      if (slide.file) {
+        const formData = new FormData();
+        formData.append("new-photo", slide.file); // Add the new photo file
+
+        await axios.put(`http://213.230.91.55:8130/photo/${slide.photoId}`, formData, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "multipart/form-data",
+          },
+        });
+
+        console.log(`Photo ${slide.photoId} updated successfully`);
+      }
+    } catch (error) {
+      console.error("Error updating photo:", error);
+    }
   };
 
   const handleSubmit = async () => {
     setIsSubmitting(true);
-  
+
     try {
       const authFormData = new FormData();
       authFormData.append("username", "nasiniemsin");
       authFormData.append("password", "2x2=xx");
-  
+
       const authResponse = await axios.post("http://213.230.91.55:8130/v1/auth/login", authFormData);
       const token = authResponse.data.data.token;
-  
-      // First, handle DELETE requests for the deleted slides
-      for (const slide of deletedSlides) {
-        try {
-          await axios.delete(`https://imed.uz/api/v1/complex-e/${slide.id}`, {
-            headers: {
-              Authorization: `Bearer ${token}`,
-            },
-          });
-          console.log(`Slide ${slide.id} deleted successfully`);
-        } catch (error) {
-          console.error(`Error deleting slide ${slide.id}:`, error);
-        }
-      }
-  
-      // Then, update or create the remaining slides
+
       for (const slide of slides) {
+        if (slide.file) {
+          await updatePhoto(slide); // Update the photo if it was changed
+        }
+
         const slideData = {
           id: slide.id,
           name: {
@@ -106,15 +128,15 @@ export default function SliderModal({ onClose }) {
             ru: slide.name.ru,
             en: slide.name.en,
           },
-          photo: slide.photo ? { id: slide.photo.id, url: slide.photo } : null,
+          photo: slide.photo ? { id: slide.photoId, url: slide.photo } : null,
         };
-  
+
         await axios.put("https://imed.uz/api/v1/complex-e", slideData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },
         });
-        console.log(`Slide ${slide.id || 'new'} updated/created successfully`);
+        console.log(`Slide ${slide.id || "new"} updated/created successfully`);
       }
     } catch (error) {
       console.error("Error in handleSubmit:", error);
@@ -122,7 +144,13 @@ export default function SliderModal({ onClose }) {
       setIsSubmitting(false);
     }
   };
-  
+
+  const removeImage = (index) => {
+    const newSlides = [...slides];
+    newSlides[index].photo = ""; // Remove the image preview
+    newSlides[index].file = null; // Remove the file if it exists
+    setSlides(newSlides);
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-[999]">
@@ -136,22 +164,19 @@ export default function SliderModal({ onClose }) {
         <div className="absolute top-4 left-[40%] flex space-x-4">
           <button
             onClick={() => setLanguage("uz")}
-            className={`px-3 py-2 rounded-md ${language === "uz" ? "bg-red-500 text-white" : "bg-gray-300 text-black"
-              }`}
+            className={`px-3 py-2 rounded-md ${language === "uz" ? "bg-red-500 text-white" : "bg-gray-300 text-black"}`}
           >
             UZ
           </button>
           <button
             onClick={() => setLanguage("ru")}
-            className={`px-3 py-2 rounded-md ${language === "ru" ? "bg-red-500 text-white" : "bg-gray-300 text-black"
-              }`}
+            className={`px-3 py-2 rounded-md ${language === "ru" ? "bg-red-500 text-white" : "bg-gray-300 text-black"}`}
           >
             RU
           </button>
           <button
             onClick={() => setLanguage("en")}
-            className={`px-3 py-2 rounded-md ${language === "en" ? "bg-red-500 text-white" : "bg-gray-300 text-black"
-              }`}
+            className={`px-3 py-2 rounded-md ${language === "en" ? "bg-red-500 text-white" : "bg-gray-300 text-black"}`}
           >
             EN
           </button>
@@ -177,7 +202,7 @@ export default function SliderModal({ onClose }) {
                 Название кейса/клиента
                 <input
                   type="text"
-                  value={slide.name[language] || ""} // Get the text for the selected language
+                  value={slide.name[language] || ""}
                   onChange={(e) => handleChange(index, "name", e.target.value)}
                   className="mt-1 block w-[70%] p-3 border border-gray-300 rounded-xl"
                 />
@@ -189,9 +214,7 @@ export default function SliderModal({ onClose }) {
                 {!slide.photo && (
                   <input
                     type="file"
-                    onChange={(e) =>
-                      handleChange(index, "photo", URL.createObjectURL(e.target.files[0]))
-                    }
+                    onChange={(e) => handleFileChange(index, e.target.files[0])}
                     className="mt-1 block w-full"
                   />
                 )}
@@ -205,8 +228,8 @@ export default function SliderModal({ onClose }) {
                       className="rounded-md"
                     />
                     <button
-                      className="absolute top-1 right-[90px]"
-                      onClick={() => handleChange(index, "photo", "")}
+                      className="absolute top-2 right-[95px]"
+                      onClick={() => removeImage(index)}
                     >
                       <Image src={arrowred} alt="remove" width={25} height={25} />
                     </button>
@@ -220,8 +243,7 @@ export default function SliderModal({ onClose }) {
           <button
             onClick={handleSubmit}
             disabled={isSubmitting}
-            className={`w-full py-3 max-w-[223px] ${isSubmitting ? "bg-gray-400" : "bg-red-500"
-              } text-white`}
+            className={`w-full py-3 max-w-[223px] ${isSubmitting ? "bg-gray-400" : "bg-red-500"} text-white`}
           >
             {isSubmitting ? "Обновление..." : "Готово"}
           </button>
