@@ -32,6 +32,41 @@ export default function BannerCarousel() {
     fetchBanners();
   }, []);
 
+  // Function to delete a banner by ID
+  const deleteBanner = async (id) => {
+    try {
+      // Log in to get the authentication token
+      const authFormData = new FormData();
+      authFormData.append("username", "nasiniemsin");
+      authFormData.append("password", "2x2=xx");
+      
+      const authResponse = await axios.post(
+        "http://213.230.91.55:8130/v1/auth/login",
+        authFormData
+      );
+
+      const token = authResponse.data.data.token;
+
+      // Make the DELETE request with authorization
+      const response = await axios.delete(
+        `http://213.230.91.55:8130/v1/banner/slider/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token in the headers
+          },
+        }
+      );
+
+      if (response.status === 200) {
+        // Filter out the deleted banner from the state
+        setBanners((prevBanners) => prevBanners.filter((banner) => banner.id !== id));
+        console.log("Banner deleted successfully");
+      }
+    } catch (error) {
+      console.error("Error deleting banner:", error);
+    }
+  };
+
   const settings = {
     infinite: true,
     speed: 500,
@@ -57,7 +92,6 @@ export default function BannerCarousel() {
   const goToSlide = (index) => {
     sliderRef.current.slickGoTo(index);
   };
-  console.log("Banners", banners);
 
   return (
     <div className="relative w-full max-w-[1440px] mx-auto overflow-hidden px-2 lg:px-12 group">
