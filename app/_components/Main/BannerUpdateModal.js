@@ -6,11 +6,12 @@ import { PlusOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 
-export default function BannerUpdateModal({ visible, onClose, bannerData }) {
+export default function BannerUpdateModal({ visible, onClose, bannerId }) {
   const [form] = Form.useForm();
   const [inputValue, setInputValue] = useState("");
   const [loading, setLoading] = useState(false);
   const [language, setLanguage] = useState("ru");
+  const [isSaveDisabled, setIsSaveDisabled] = useState(true); // Управление кнопкой "Готово"
 
   const [updateItem, setUpdateItem] = useState({
     id: null,
@@ -43,28 +44,46 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
     logo: { id: null, url: "" },
     photo: { id: null, url: "" },
     background: { id: null, url: "" },
+    link: '',
     active: true,
     orderNum: 0,
   });
 
-  useEffect(() => {
-    if (bannerData) {
-      // Проверка на null и задание значений по умолчанию
-      const processedData = {
-        ...bannerData,
-        categoryName: bannerData.categoryName || { uz: "", ru: "", en: "" },
-        title: bannerData.title || { uz: "", ru: "", en: "" },
-        subTitle: bannerData.subTitle || { uz: "", ru: "", en: "" },
-        tagName: bannerData.tagName || { uz: "", ru: "", en: "" },
-        logo: bannerData.logo || { id: null, url: "" },
-        photo: bannerData.photo || { id: null, url: "" },
-        background: bannerData.productBackground || { id: null, url: "" },
-      };
+  console.log("UpdateItem", updateItem);
 
-      setUpdateItem(processedData);
-      form.setFieldsValue(processedData);
+  useEffect(() => {
+    const fetchBannerData = async () => {
+      try {
+        const response = await axios.get(`http://213.230.91.55:8130/v1/banner/${bannerId}`, {
+          headers: {
+            "Accept-Language": "",
+          },
+        });
+        const data = response.data.data;
+        const processedData = {
+          ...data,
+          categoryName: data.categoryName || { uz: "", ru: "", en: "" },
+          title: data.title || { uz: "", ru: "", en: "" },
+          subTitle: data.subTitle || { uz: "", ru: "", en: "" },
+          tagName: data.tagName || { uz: "", ru: "", en: "" },
+          logo: data.logo || { id: null, url: "" },
+          photo: data.photo || { id: null, url: "" },
+          background: data.productBackground || { id: null, url: "" },
+          link: data.link || { uz: "", ru: "", en: "" },
+        };
+
+        setUpdateItem(processedData);
+        form.setFieldsValue(processedData);
+        checkIfImagesPresent(processedData); // Проверка наличия изображений
+      } catch (error) {
+        message.error("Failed to fetch banner data.");
+      }
+    };
+
+    if (bannerId) {
+      fetchBannerData();
     }
-  }, [bannerData, form]);
+  }, [bannerId, form]);
 
   const handleInputChange = (field, value) => {
     setUpdateItem((prev) => ({ ...prev, [field]: value }));
@@ -98,14 +117,40 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
         tagName: { ...prev.tagName, [lang]: updatedTags },
       }));
     }
-    setInputValue(""); // Clear the input value after confirming
+    setInputValue("");
   };
 
+  // Проверка, есть ли изображения
+  const checkIfImagesPresent = (data) => {
+    const allImagesPresent = data.logo.url && data.photo.url && data.background.url;
+    setIsSaveDisabled(!allImagesPresent); // Делаем кнопку активной или неактивной
+  };
+
+  // Замена изображения вместо удаления
   const handleUploadChange = (field, { fileList }) => {
     const file = fileList[0]?.originFileObj || null;
-    setUpdateItem((prev) => ({ ...prev, [field]: { ...prev[field], file } }));
+    setUpdateItem((prev) => ({ ...prev, [field]: { ...prev[field], url: file } }));
+    setIsSaveDisabled(!file); // Проверяем, если ли изображение, чтобы активировать кнопку
   };
 
+  // Function to upload new photos to API
+  const uploadNewPhoto = async (file, id) => {
+    const formData = new FormData();
+    formData.append("new-photo", file);
+    try {
+      const response = await axios.put(`http://213.230.91.55:8130/photo/${id}`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+      return response.data.data.url; // return the new URL
+    } catch (error) {
+      message.error("Ошибка при загрузке изображения");
+      throw error;
+    }
+  };
+
+  // Function to handle form submission and image uploading
   const handleFormSubmit = async () => {
     setLoading(true);
     try {
@@ -118,6 +163,24 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
       );
 
       const token = authResponse.data.data.token;
+
+      // Check if images are file objects and need to be uploaded
+      const updatedImages = { ...updateItem };
+
+      if (updateItem.logo?.url instanceof File) {
+        const newLogoUrl = await uploadNewPhoto(updateItem.logo.url, updateItem.logo.id);
+        updatedImages.logo.url = newLogoUrl;
+      }
+
+      if (updateItem.photo?.url instanceof File) {
+        const newPhotoUrl = await uploadNewPhoto(updateItem.photo.url, updateItem.photo.id);
+        updatedImages.photo.url = newPhotoUrl;
+      }
+
+      if (updateItem.background?.url instanceof File) {
+        const newBackgroundUrl = await uploadNewPhoto(updateItem.background.url, updateItem.background.id);
+        updatedImages.background.url = newBackgroundUrl;
+      }
 
       const formData = new FormData();
       formData.append(
@@ -134,70 +197,24 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
           tag: updateItem.tag,
           tagName: updateItem.tagName,
           backgroundColour: updateItem.backgroundColour,
+          link: updateItem.link,
           active: updateItem.active,
           orderNum: updateItem.orderNum,
+          logo: updatedImages.logo.url,
+          photo: updatedImages.photo.url,
+          background: updatedImages.background.url,
         })
       );
 
-      // Check for files and append them to the formData
-      if (updateItem.logo.file) {
-        const logoFormData = new FormData();
-        logoFormData.append("new-photo", updateItem.logo.file);
-        await axios.put(
-          `http://213.230.91.55:8130/photo/${updateItem.logo.id}`,
-          logoFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-
-      if (updateItem.photo.file) {
-        const photoFormData = new FormData();
-        photoFormData.append("new-photo", updateItem.photo.file);
-        await axios.put(
-          `http://213.230.91.55:8130/photo/${updateItem.photo.id}`,
-          photoFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-
-      if (updateItem.background.file) {
-        const backgroundFormData = new FormData();
-        backgroundFormData.append("new-photo", updateItem.background.file);
-        await axios.put(
-          `http://213.230.91.55:8130/photo/${updateItem.background.id}`,
-          backgroundFormData,
-          {
-            headers: {
-              "Content-Type": "multipart/form-data",
-              Authorization: `Bearer ${token}`,
-            },
-          }
-        );
-      }
-
-      const response = await axios.put(
-        "http://213.230.91.55:8130/banner/update",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
+      await axios.put("http://213.230.91.55:8130/banner/slider", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
       message.success("Баннер успешно обновлен!");
-      onClose(); // Close the modal
+      onClose();
     } catch (error) {
       console.error("Error updating banner:", error);
       message.error("Произошла ошибка. Пожалуйста, проверьте данные и попробуйте снова.");
@@ -206,74 +223,44 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
     }
   };
 
-  console.log("UpdateItem", updateItem);
-
   return (
     <Modal
       visible={visible}
       title="Редактировать баннер"
       onCancel={onClose}
       footer={[
-        <Button
-          key="submit"
-          type="primary"
-          onClick={handleFormSubmit}
-          disabled={loading}
-        >
+        <Button key="submit" type="primary" onClick={handleFormSubmit} disabled={isSaveDisabled || loading}>
           {loading ? <Spin /> : "Готово"}
         </Button>,
       ]}
     >
       <div className="flex justify-end mb-4">
         <Button.Group>
-          <Button
-            type={language === "ru" ? "primary" : "default"}
-            onClick={() => setLanguage("ru")}
-          >
+          <Button type={language === "ru" ? "primary" : "default"} onClick={() => setLanguage("ru")}>
             RU
           </Button>
-          <Button
-            type={language === "uz" ? "primary" : "default"}
-            onClick={() => setLanguage("uz")}
-          >
+          <Button type={language === "uz" ? "primary" : "default"} onClick={() => setLanguage("uz")}>
             UZ
           </Button>
-          <Button
-            type={language === "en" ? "primary" : "default"}
-            onClick={() => setLanguage("en")}
-          >
+          <Button type={language === "en" ? "primary" : "default"} onClick={() => setLanguage("en")}>
             EN
           </Button>
         </Button.Group>
       </div>
-      <Form
-        form={form}
-        layout="vertical"
-        initialValues={updateItem}
-        onValuesChange={(changedValues) => {
-          const [field] = Object.keys(changedValues);
-          if (field in updateItem) {
-            handleInputChange(field, changedValues[field]);
-          }
-        }}
-      >
+      <Form form={form} layout="vertical">
         <Form.Item label="Название категории" name={`categoryName.${language}`}>
           <Input
             placeholder="Название категории"
-            value={updateItem.categoryName?.[language] || ""}
-            onChange={(e) =>
-              handleNestedInputChange("categoryName", language, e.target.value)
-            }
+            defaultValue={updateItem.categoryName[language]}
+            onChange={(e) => handleNestedInputChange("categoryName", language, e.target.value)}
           />
         </Form.Item>
 
         <Form.Item label="Заголовок баннера" name={`title.${language}`}>
           <Input
             placeholder="Заголовок баннера"
-            value={updateItem.title?.[language] || ""}
-            onChange={(e) =>
-              handleNestedInputChange("title", language, e.target.value)
-            }
+            defaultValue={updateItem.title?.[language]}
+            onChange={(e) => handleNestedInputChange("title", language, e.target.value)}
           />
         </Form.Item>
 
@@ -281,10 +268,16 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
           <TextArea
             placeholder="Подзаголовок"
             autoSize={{ minRows: 2 }}
-            value={updateItem.subTitle?.[language] || ""}
-            onChange={(e) =>
-              handleNestedInputChange("subTitle", language, e.target.value)
-            }
+            defaultValue={updateItem.subTitle?.[language]}
+            onChange={(e) => handleNestedInputChange("subTitle", language, e.target.value)}
+          />
+        </Form.Item>
+
+        <Form.Item label="Ссылка" name={`link.${language}`}>
+          <Input
+            placeholder="Ссылка"
+            defaultValue={updateItem.link?.[language]}
+            onChange={(e) => handleNestedInputChange("link", language, e.target.value)}
           />
         </Form.Item>
 
@@ -315,10 +308,11 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
           />
         </Form.Item>
 
+        {/* Логотип */}
         <Form.Item label="Логотип производителя" name="logo">
           <Upload
             fileList={
-              updateItem.logo.url
+              updateItem.logo.url && !(updateItem.logo.url instanceof File)
                 ? [
                     {
                       uid: "1",
@@ -332,19 +326,18 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
             listType="picture-card"
             onChange={(info) => handleUploadChange("logo", info)}
           >
-            {!updateItem.logo.url && (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить файл</div>
-              </div>
-            )}
+            <div>
+              <PlusOutlined />
+              <div style={{ marginTop: 8 }}>{updateItem.logo.url ? "Изменить" : "Загрузить"}</div>
+            </div>
           </Upload>
         </Form.Item>
 
+        {/* Изображение товара */}
         <Form.Item label="Изображение товара" name="photo">
           <Upload
             fileList={
-              updateItem.photo.url
+              updateItem.photo.url && !(updateItem.photo.url instanceof File)
                 ? [
                     {
                       uid: "1",
@@ -358,19 +351,18 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
             listType="picture-card"
             onChange={(info) => handleUploadChange("photo", info)}
           >
-            {!updateItem.photo.url && (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить файл</div>
-              </div>
-            )}
+            <div>
+              <PlusOutlined />
+              <div style={{ marginTop: 8 }}>{updateItem.photo.url ? "Изменить" : "Загрузить"}</div>
+            </div>
           </Upload>
         </Form.Item>
 
+        {/* Фон товара */}
         <Form.Item label="Фон товара" name="background">
           <Upload
             fileList={
-              updateItem.background?.url
+              updateItem.background?.url && !(updateItem.background.url instanceof File)
                 ? [
                     {
                       uid: "1",
@@ -384,12 +376,10 @@ export default function BannerUpdateModal({ visible, onClose, bannerData }) {
             listType="picture-card"
             onChange={(info) => handleUploadChange("background", info)}
           >
-            {!updateItem.background?.url && (
-              <div>
-                <PlusOutlined />
-                <div style={{ marginTop: 8 }}>Загрузить файл</div>
-              </div>
-            )}
+            <div>
+              <PlusOutlined />
+              <div style={{ marginTop: 8 }}>{updateItem.background?.url ? "Изменить" : "Загрузить"}</div>
+            </div>
           </Upload>
         </Form.Item>
       </Form>

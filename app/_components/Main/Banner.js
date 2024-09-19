@@ -105,7 +105,8 @@ export default function BannerCarousel() {
         </div>
       ) : (
         <Slider ref={sliderRef} {...settings}>
-          {banners.map((banner, index) => (
+          {banners.map((banner, index) =>{
+            return (
             <div
               key={index}
               className="min-w-full flex justify-center px-2 max-h-[600px] min-h-[500px] relative"
@@ -119,11 +120,11 @@ export default function BannerCarousel() {
                 className="w-full object-contain"
               />
               <div className="absolute left-0 bottom-0 flex space-x-2 p-2">
-                <button onClick={() => setEditModal(banner)}>Изменить</button>
+                <button onClick={() => setEditModal(banner.id)}>Изменить</button>
                 <button onClick={() => deleteBanner(banner.id)}>Удалить</button>
               </div>
             </div>
-          ))}
+          )})}
         </Slider>
       )}
 
@@ -159,7 +160,7 @@ export default function BannerCarousel() {
         <BannerUpdateModal
           visible={!!editModal}
           onClose={() => setEditModal(null)}
-          bannerData={editModal}
+          bannerId={editModal}
         />
       )}
     </div>
