@@ -182,10 +182,7 @@ export default function BannerUpdateModal({ visible, onClose, bannerId }) {
         updatedImages.background.url = newBackgroundUrl;
       }
 
-      const formData = new FormData();
-      formData.append(
-        "json",
-        JSON.stringify({
+        const data = JSON.stringify({
           id: updateItem.id,
           type: updateItem.type,
           category: updateItem.category,
@@ -200,15 +197,11 @@ export default function BannerUpdateModal({ visible, onClose, bannerId }) {
           link: updateItem.link,
           active: updateItem.active,
           orderNum: updateItem.orderNum,
-          logo: updatedImages.logo.url,
-          photo: updatedImages.photo.url,
-          background: updatedImages.background.url,
         })
-      );
 
-      await axios.put("http://213.230.91.55:8130/banner/slider", formData, {
+      await axios.put("http://213.230.91.55:8130/v1/banner/slider", data, {
         headers: {
-          "Content-Type": "multipart/form-data",
+          "Content-Type": "Application/json",
           Authorization: `Bearer ${token}`,
         },
       });
