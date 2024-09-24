@@ -159,7 +159,7 @@ export default function ProductMain({ closeModal }) {
         }
 
         const response = await axios.post(
-          "https://imed.uz/api/v1/product",
+          "http://213.230.91.55:8130/v1/product",
           formData,
           {
             headers: {
@@ -187,7 +187,7 @@ export default function ProductMain({ closeModal }) {
           }
           fileData.append("product-id", productId);
 
-          await axios.post("https://imed.uz/api/v1/product/file", fileData, {
+          await axios.post("http://213.230.91.55:8130/v1/product/file", fileData, {
             headers: {
               Authorization: `Bearer ${token}`,
             },
@@ -216,7 +216,7 @@ export default function ProductMain({ closeModal }) {
           }
 
           await axios.post(
-            "https://imed.uz/api/v1/product/review",
+            "http://213.230.91.55:8130/v1/product/review",
             reviewFormData,
             {
               headers: {

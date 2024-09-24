@@ -22,7 +22,7 @@ export default function ProductCharacteristics({
   useEffect(() => {
     const fetchClients = async () => {
       try {
-        const response = await axios.get("https://imed.uz/api/v1/client/all");
+        const response = await axios.get("http://213.230.91.55:8130/v1/client/all");
         setClients(response.data.data);
       } catch (error) {
         console.error("Error fetching clients:", error);

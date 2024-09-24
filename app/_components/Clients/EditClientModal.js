@@ -80,7 +80,7 @@ const ClientsInfo = ({ slug, onClose }) => {
 
   useEffect(() => {
     axios
-      .get(`https://imed.uz/api/v1/client/${slug}`, {
+      .get(`http://213.230.91.55:8130/v1/client/${slug}`, {
         headers: {
           "Accept-Language": "",
         },

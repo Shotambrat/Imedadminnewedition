@@ -19,7 +19,7 @@ export default function DeleteConfirmationModal({ productId, onClose }) {
     const token = authResponse.data.data.token;
     try {
       const response = await axios.delete(
-        `https://imed.uz/api/v1/partner/delete/${productId}`,
+        `http://213.230.91.55:8130/v1/partner/delete/${productId}`,
         {
           headers: {
             Authorization: `Bearer ${token}`,

@@ -16,7 +16,7 @@ export default function ListPartners() {
   const [editModalSlug, setEditModalSlug] = useState(null);
   const [partners, setPartners] = useState([]);
   useEffect(() => {
-    axios("https://imed.uz/api/v1/partner/all", {
+    axios("http://213.230.91.55:8130/v1/partner/all", {
       headers: {
         "Accept-Language": "uz",
       },

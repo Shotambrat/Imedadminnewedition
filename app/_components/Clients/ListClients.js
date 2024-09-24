@@ -18,7 +18,7 @@ export default function ListClients() {
   useEffect(() => {
     try {
       axios
-        .get("https://imed.uz/api/v1/client/all", {
+        .get("http://213.230.91.55:8130/v1/client/all", {
           headers: {
             "Accept-Language": "uz",
           },

@@ -16,7 +16,7 @@ export default function SliderModal({ onClose }) {
   useEffect(() => {
     const fetchSlides = async () => {
       try {
-        const response = await axios.get("https://imed.uz/api/v1/complex-e", {
+        const response = await axios.get("http://213.230.91.55:8130/v1/complex-e", {
           headers: {
             "Accept-Language": "",
           },
@@ -131,7 +131,7 @@ export default function SliderModal({ onClose }) {
           photo: slide.photo ? { id: slide.photoId, url: slide.photo } : null,
         };
 
-        await axios.put("https://imed.uz/api/v1/complex-e", slideData, {
+        await axios.put("http://213.230.91.55:8130/v1/complex-e", slideData, {
           headers: {
             Authorization: `Bearer ${token}`,
           },

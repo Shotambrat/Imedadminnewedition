@@ -76,7 +76,7 @@ export default function ProductInfo({ slug, onClose }) {
             formData.append("photo", photo.url);
   
             const response = await axios.post(
-              "https://imed.uz/api/photo",
+              "http://213.230.91.55:8130/api/photo",
               formData,
               {
                 headers: {
@@ -87,7 +87,7 @@ export default function ProductInfo({ slug, onClose }) {
             );
             return { url: response.data.data[0].url };
           } else if (photo.url == null) {
-            await axios.delete(`https://imed.uz/api/photo/${photo.id}`, {
+            await axios.delete(`http://213.230.91.55:8130/api/photo/${photo.id}`, {
               headers: {
                 Authorization: `Bearer ${token}`,
               },
@@ -122,7 +122,7 @@ export default function ProductInfo({ slug, onClose }) {
 
       console.log("UpdatedData",updatedData)
   
-      await axios.put(`https://imed.uz/api/v1/product`, updatedData, {
+      await axios.put(`http://213.230.91.55:8130/v1/product`, updatedData, {
         headers: {
           Authorization: `Bearer ${token}`,
         },

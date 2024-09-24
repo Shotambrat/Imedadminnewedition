@@ -44,7 +44,7 @@ export default function SliderModal({onClose}) {
                 }
 
                 const response = await axios.post(
-                    `https://imed.uz/api/v1/complex-e`,
+                    `http://213.230.91.55:8130/v1/complex-e`,
                     formData,
                     {
                         headers: {

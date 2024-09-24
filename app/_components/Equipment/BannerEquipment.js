@@ -33,7 +33,7 @@ export default function BannerCarousel() {
 
     // Fetch data from API
     useEffect(() => {
-        axios("https://imed.uz/api/v1/complex-e", {
+        axios("http://213.230.91.55:8130/v1/complex-e", {
             headers: {
                 "Accept-Language": "uz",
             },
