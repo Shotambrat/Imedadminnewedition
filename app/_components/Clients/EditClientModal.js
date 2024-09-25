@@ -68,7 +68,7 @@ const ClientsInfo = ({ slug, onClose }) => {
               "Content-Type": "multipart/form-data",
             },
           })
-          .then((response) => createdImages.push(response.data.data.url));
+          .then((response) =>{ createdImages.push(response.data.data[0].url)});
       }
     } catch (e) {
       console.error("Error to create image in server", e);
