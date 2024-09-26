@@ -24,19 +24,47 @@ export default function AboutEvent({
   const handleSaveOption = (index, updatedOption) => {
     const updatedOptionsArr = [...optionsArr];
     updatedOptionsArr[index] = updatedOption;
-
-    const updatedItem = {
-      ...activeItem,
-      abouts: updatedOptionsArr,
-    };
-
+    
+    // Обновляем локальное состояние и сразу же обновляем глобальное состояние
     setOptionsArr(updatedOptionsArr);
+    
     setCreatedList((prevList) =>
-      prevList.map((item) =>
-        item.id === activeItem.id ? updatedItem : item
-      )
+      prevList.map((item) => (item.id === activeId ? {
+        ...item,
+        abouts: updatedOptionsArr
+      } : item))
     );
   };
+  
+  // Сохранение текущих изменений перед сменой языка
+  const handleLangChange = (newLang) => {
+
+    setCreatedList((prevList) =>
+      prevList.map((item) => (item.id === activeId ? {
+        ...item,
+        abouts: optionsArr
+      } : item))
+    );
+    
+    // Переключаем язык
+    setActiveLang(newLang);
+  };
+  
+  // const handleSaveAndCloseModal = () => {
+  //   const updatedItem = {
+  //     ...activeItem,
+  //     abouts: optionsArr,
+  //   };
+  
+  //   // Сохраняем изменения только после подтверждения
+  //   setCreatedList((prevList) =>
+  //     prevList.map((item) =>
+  //       item.id === activeItem.id ? updatedItem : item
+  //     )
+  //   );
+    
+  //   setEditModal(false);
+  // };
 
   const handleAddOption = () => {
     const newOption = {
@@ -51,20 +79,25 @@ export default function AboutEvent({
         en: "",
       },
     };
-
-    const updatedOptionsArr = [...optionsArr, newOption];
-
-    const updatedItem = {
-      ...activeItem,
-      abouts: updatedOptionsArr,
-    };
-
-    setOptionsArr(updatedOptionsArr);
-    setCreatedList((prevList) =>
-      prevList.map((item) =>
-        item.id === activeItem.id ? updatedItem : item
-      )
-    );
+  
+    // Добавляем новый элемент в локальное состояние optionsArr
+    setOptionsArr((prevOptions) => {
+      const updatedOptions = [...prevOptions, newOption];
+  
+      // После обновления локального состояния, обновляем createdList
+      setCreatedList((prevList) =>
+        prevList.map((item) =>
+          item.id === activeId
+            ? {
+                ...item,
+                abouts: updatedOptions, // Обновляем поле abouts
+              }
+            : item
+        )
+      );
+  
+      return updatedOptions; // Возвращаем обновленный массив для setOptionsArr
+    });
   };
 
   const handleDeleteOption = (index) => {
@@ -81,10 +114,6 @@ export default function AboutEvent({
         item.id === activeItem.id ? updatedItem : item
       )
     );
-  };
-
-  const handleSaveAndCloseModal = () => {
-    setEditModal(false);
   };
 
   return (
@@ -105,7 +134,7 @@ export default function AboutEvent({
                   className={`font-medium border px-4 pt-1 pb-2 rounded-lg text-xl border-red-300 ${
                     lang === activeLang ? "bg-redMain text-white" : ""
                   }`}
-                  onClick={() => setActiveLang(lang)}
+                  onClick={() => handleLangChange(lang)}
                 >
                   {lang.toUpperCase()}
                 </button>
@@ -171,7 +200,7 @@ export default function AboutEvent({
             <div>
               <button
                 className="px-12 py-3 bg-redMain text-white"
-                onClick={handleSaveAndCloseModal}
+                onClick={() =>  setEditModal(false)}
               >
                 Сохранить
               </button>

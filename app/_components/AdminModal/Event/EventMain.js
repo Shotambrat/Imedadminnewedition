@@ -159,6 +159,8 @@ export default function EventMain({ closeModal }) {
     }
   };
 
+  console.log('CreatedList', createdList)
+
   const languages = ["uz", "ru", "en"];
   const [activeLang, setActiveLang] = useState(languages[0]);
 

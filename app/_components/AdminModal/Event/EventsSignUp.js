@@ -62,32 +62,22 @@ export default function EventSignUp({
     setCurrentText(e.target.value);
   };
 
-  const handleSave = async () => {
-    const itemToSave = createdList.find((item) => item.id === activeId);
-
-    if (itemToSave.photo[0]) {
-      const formData = new FormData();
-      formData.append("file", itemToSave.photo[0]);
-
-      try {
-        const response = await fetch("/api/upload", {
-          method: "POST",
-          body: formData,
-        });
-
-        if (response.ok) {
-          console.log("File uploaded successfully");
-        } else {
-          console.error("Failed to upload file");
-        }
-      } catch (error) {
-        console.error("Error uploading file:", error);
+  const handleSave = () => {
+    const updatedList = createdList.map((item) => {
+      if (item.id === activeId) {
+        return {
+          ...item,
+          name: {
+            ...item.name,
+            [activeLang]: currentText, // Используем локальное состояние
+          }
+        };
       }
-    }
-
-    console.log("Item saved:", itemToSave);
+      return item;
+    });
+    setCreatedList(updatedList);
     setEditAdmin(false);
-  };
+};
 
   return (
     <div className="w-full max-w-[1440px] mx-auto flex flex-col gap-1 px-2 mb-[100px] mdl:mb-[150px] xl:mb-[200px] ">
