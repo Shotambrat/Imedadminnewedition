@@ -232,7 +232,7 @@ export default function MoreInfo({ activeItem, activeLang, setActiveLang, setCre
             </div>
             <button
               className="px-12 py-3 bg-redMain text-white"
-              onClick={handleSave}
+              onClick={() => setEditModal(false)}
             >
               Сохранить
             </button>
